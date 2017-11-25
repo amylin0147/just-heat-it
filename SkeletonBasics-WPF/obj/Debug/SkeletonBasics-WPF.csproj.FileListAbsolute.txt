@@ -1,0 +1,14 @@
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.exe
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.pdb
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.dll
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.xml
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\MainWindow.baml
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\MainWindow.g.cs
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\App.g.cs
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF_MarkupCompile.cache
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.g.resources
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Properties.Resources.resources
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.GenerateResource.Cache
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.CoreCompileInputs.cache
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\irenelin0258\Documents\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.pdb
