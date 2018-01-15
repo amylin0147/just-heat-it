@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Images"
   ],
-  "SelectedNode": "\\SkeletonBasics-WPF.csproj",
+  "SelectedNode": "\\MainWindow.xaml.cs",
   "PreviewInSolutionExplorer": false
 }

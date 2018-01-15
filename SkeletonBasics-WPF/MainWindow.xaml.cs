@@ -9,6 +9,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.IO;
     using System.Windows;
     using System.Windows.Media;
+    using System.Timers;
+    using System;
     using Microsoft.Kinect;
 
     /// <summary>
@@ -80,6 +82,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// Drawing image that we will display
         /// </summary>
         private DrawingImage imageSource;
+
+        /// <summary>
+        /// dance move prompt
+        /// </summary>
+        System.Windows.Media.Imaging.BitmapImage danceImage;
+
+        private int danceState;
+
+        private static System.Timers.Timer aTimer;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -177,10 +188,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
             }
 
-            if (null == this.sensor)
-            {
-                this.statusBarText.Text = Properties.Resources.NoKinectReady;
-            }
+            this.danceState = 0;
         }
 
         /// <summary>
@@ -361,15 +369,58 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             if (null != this.sensor)
             {
-                if (this.checkBoxSeatedMode.IsChecked.GetValueOrDefault())
+                /*if (this.checkBoxSeatedMode.IsChecked.GetValueOrDefault())
                 {
                     this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
                 }
                 else
                 {
                     this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
-                }
+                } */
+                this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
             }
+        }
+
+        void onClick1(object sender, RoutedEventArgs e)
+        {
+            //hide button
+
+            //start dance
+            // Create a timer with a two second interval.
+            aTimer = new System.Timers.Timer(2000);
+            // Hook up the Elapsed event for the timer. 
+            aTimer.Elapsed += OnTimedEvent;
+            aTimer.AutoReset = true;
+            aTimer.Enabled = true;
+            //aTimer.Start();
+
+        }
+
+        private void OnTimedEvent(Object source, ElapsedEventArgs e)
+        {
+            
+            //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
+            Dispatcher.Invoke((Action)delegate() { 
+                if(this.danceState == 0){
+                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance2.png",UriKind.Relative));
+                this.danceState = 1;
+            } else if(this.danceState == 1){
+                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance3.png",UriKind.Relative));
+                this.danceState = 2;
+            } else if(this.danceState == 2){
+                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance4.png",UriKind.Relative));
+                this.danceState = 3;
+            } else { //if(this.danceState == 3){
+                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png",UriKind.Relative));
+                this.danceState = 0;
+            }
+                DanceMove.Source = this.danceImage;
+            });
+
+            //change dance move 1 to 2
+            //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance2.png",UriKind.Relative));
+            //DanceMove.Source = this.danceImage;
+
         }
     }
 }
