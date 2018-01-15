@@ -228,7 +228,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// <summary>
         /// Return true if elbows are near torso
-        /// (elbows are within 0.3m of shoulders)
+        /// (distance between elbows is within 0.3m of distance between shoulders)
         private bool isValidChknMove1(Skeleton skeleton)
         {
             Joint ShoulderLeft = skeleton.Joints[JointType.ShoulderLeft];
@@ -246,6 +246,32 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             if (shoulderWidth + 0.3 > elbowDistance) 
             {
                 ///System.Console.WriteLine(shoulderWidth + '\t' + elbowDistance);
+                return true;
+            }
+            else return false;
+
+        }
+
+        /// <summary>
+        /// Return true if hands are near shoulders
+        /// (hands are within 0.2m of shoulders)
+        private bool isValidChknMove2(Skeleton skeleton)
+        {
+            Joint ShoulderLeft = skeleton.Joints[JointType.ShoulderLeft];
+            Joint ShoulderRight = skeleton.Joints[JointType.ShoulderRight];
+            Joint HandLeft = skeleton.Joints[JointType.HandLeft];
+            Joint HandRight = skeleton.Joints[JointType.HandRight];
+
+            double Left = this.getJointDistance(skeleton, JointType.ShoulderLeft, JointType.HandLeft);
+            double Right = this.getJointDistance(skeleton, JointType.ShoulderRight, JointType.HandRight);
+
+            // If we can't find either of these joints, exit
+            if (Left < 0 || Right < 0) return false;
+
+            //if elbows are close enough to torso
+            if (Left < 0.2 && Right < 0.2) 
+            {
+                System.Console.WriteLine(Left + '\t' + Right);
                 return true;
             }
             else return false;
@@ -274,7 +300,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         {
                             if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                System.Console.WriteLine(this.isValidChknMove1(skeleton));
+                                System.Console.WriteLine(this.isValidChknMove2(skeleton));
                             }
                         }
                     }     
