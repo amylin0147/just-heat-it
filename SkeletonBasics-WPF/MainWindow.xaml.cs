@@ -154,7 +154,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.imageSource = new DrawingImage(this.drawingGroup);
 
             // Display the drawing using our image control
-            Image.Source = this.imageSource;
+            Image.Source = this.imageSource; 
 
             // Look through all sensors and start the first connected one.
             // This requires that a Kinect is connected at the time of app startup.
@@ -175,7 +175,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.sensor.SkeletonStream.Enable();
 
                 // Add an event handler to be called whenever there is new color frame data
-                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady; 
 
                 // Start the sensor!
                 try
@@ -506,6 +506,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance2.png",UriKind.Relative));
             //DanceMove.Source = this.danceImage;
 
+        }
+
+        void onClick2(object sender, RoutedEventArgs e){
+            uniformGrid2.Visibility = Visibility.Visible;
+            uniformGrid.Visibility = Visibility.Hidden;
         }
     }
 }

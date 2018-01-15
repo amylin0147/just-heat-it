@@ -75,6 +75,7 @@
 
     </Grid> -->
 
+  <!--
   <Grid Name="layoutGrid" Margin="10 100 10 100">
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
@@ -105,7 +106,45 @@
             HorizontalAlignment = "Center"
             Foreground = "Gray"/>
   </Grid>
+-->
 
+  <Grid Margin="10 100 10 100">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+    <UniformGrid Grid.Column="0" Columns="1" Rows="2" Name="uniformGrid" >
+      <Button x:Name = "button1"
+                  Content = "Dance"
+                  Click = "onClick2"
+                  Margin = "10"
+                  Width = "150"
+                  HorizontalAlignment = "Center"
+                  Foreground = "Gray"/>
+      <Button x:Name = "button2"
+            Content = "Yoga"
+            Click = "onClick2"
+            Margin = "10"
+            Width = "150"
+            HorizontalAlignment = "Center"
+            Foreground = "Gray"/>
+    </UniformGrid>
+
+    <UniformGrid Grid.Column="0" Columns="1" Rows="3" Visibility="Hidden" Name="uniformGrid2" >
+      
+      <Image Name="checkOrRed" Source="Images\check.png" 
+             Stretch="Fill" Height="81" Width="81" Margin="10 10 10 5" />
+      <TextBlock Name="timeText" Margin="30 0 0 0" VerticalAlignment="Center"
+                 Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" 
+                 FontSize="18" >Time Left: 60s</TextBlock>
+
+      <Image x:Name="DanceMove" Source="Images\moves\dance1.png"
+             Stretch="None" HorizontalAlignment="Center" Margin="10 0 10 0" />
+    </UniformGrid>
+    <Viewbox Grid.Column="1" Stretch="Uniform" HorizontalAlignment="Center">
+      <Image Name="Image" Width="640" Height="480"/>
+    </Viewbox>
+  </Grid>
   
   
 </Window>
