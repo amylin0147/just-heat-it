@@ -205,6 +205,54 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         }
 
         /// <summary>
+        /// Return distance in meters between two joints
+        private double getJointDistance(Skeleton skeleton, JointType jointType0, JointType jointType1)
+        {
+            Joint joint0 = skeleton.Joints[jointType0];
+            Joint joint1 = skeleton.Joints[jointType1];
+
+            // If we can't find either of these joints, exit
+            if (joint0.TrackingState == JointTrackingState.NotTracked ||
+                joint1.TrackingState == JointTrackingState.NotTracked)
+            {
+                return -1;
+            }
+
+            double dist =   Math.Sqrt(
+                            Math.Pow((joint0.Position.X - joint1.Position.X), 2) +
+                            Math.Pow((joint0.Position.Y - joint1.Position.Y), 2) +
+                            Math.Pow((joint0.Position.Z - joint1.Position.Z), 2)
+                            );
+            return dist;
+        }
+
+        /// <summary>
+        /// Return true if elbows are near torso
+        /// (elbows are within 0.3m of shoulders)
+        private bool isValidChknMove1(Skeleton skeleton)
+        {
+            Joint ShoulderLeft = skeleton.Joints[JointType.ShoulderLeft];
+            Joint ShoulderRight = skeleton.Joints[JointType.ShoulderRight];
+            Joint ElbowLeft = skeleton.Joints[JointType.ElbowLeft];
+            Joint ElbowRight = skeleton.Joints[JointType.ElbowRight];
+
+            double shoulderWidth = this.getJointDistance(skeleton, JointType.ShoulderLeft, JointType.ShoulderRight);
+            double elbowDistance = this.getJointDistance(skeleton, JointType.ElbowLeft, JointType.ElbowRight);
+
+            // If we can't find either of these joints, exit
+            if (shoulderWidth < 0 || elbowDistance < 0) return false;
+
+            //if elbows are close enough to torso
+            if (shoulderWidth + 0.3 > elbowDistance) 
+            {
+                ///System.Console.WriteLine(shoulderWidth + '\t' + elbowDistance);
+                return true;
+            }
+            else return false;
+
+        }
+
+        /// <summary>
         /// Event handler for Kinect sensor's SkeletonFrameReady event
         /// </summary>
         /// <param name="sender">object sending the event</param>
@@ -219,6 +267,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                     skeletonFrame.CopySkeletonDataTo(skeletons);
+
+                    if (skeletons.Length != 0)
+                    {
+                        foreach (Skeleton skeleton in skeletons)
+                        {
+                            if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
+                            {
+                                System.Console.WriteLine(this.isValidChknMove1(skeleton));
+                            }
+                        }
+                    }     
                 }
             }
 
