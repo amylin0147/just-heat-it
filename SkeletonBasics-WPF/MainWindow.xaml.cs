@@ -14,79 +14,49 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Media;
     using Microsoft.Kinect;
 
-    /// <summary>
     /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        /// <summary>
         /// Width of output drawing
-        /// </summary>
         private const float RenderWidth = 640.0f;
 
-        /// <summary>
         /// Height of our output drawing
-        /// </summary>
         private const float RenderHeight = 480.0f;
 
-        /// <summary>
         /// Thickness of drawn joint lines
-        /// </summary>
         private const double JointThickness = 5;//3;
 
-        /// <summary>
         /// Thickness of body center ellipse
-        /// </summary>
         private const double BodyCenterThickness = 10;
 
-        /// <summary>
         /// Thickness of clip edge rectangles
-        /// </summary>
         private const double ClipBoundsThickness = 10;
 
-        /// <summary>
         /// Brush used to draw skeleton center point
-        /// </summary>
         private readonly Brush centerPointBrush = Brushes.Blue;
 
-        /// <summary>
         /// Brush used for drawing joints that are currently tracked
-        /// </summary>
         private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
 
-        /// <summary>
         /// Brush used for drawing joints that are currently inferred
-        /// </summary>        
         private readonly Brush inferredJointBrush = Brushes.Yellow;
 
-        /// <summary>
         /// Pen used for drawing bones that are currently tracked
-        /// </summary>
         private readonly Pen trackedBonePen = new Pen(Brushes.Green, 16);//6);
 
-        /// <summary>
         /// Pen used for drawing bones that are currently inferred
-        /// </summary>        
         private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 16);//1);
 
-        /// <summary>
         /// Active Kinect sensor
-        /// </summary>
         private KinectSensor sensor;
 
-        /// <summary>
         /// Drawing group for skeleton rendering output
-        /// </summary>
         private DrawingGroup drawingGroup;
 
-        /// <summary>
         /// Drawing image that we will display
-        /// </summary>
         private DrawingImage imageSource;
 
-        /// <summary>
         /// dance move prompt
-        /// </summary>
         System.Windows.Media.Imaging.BitmapImage danceImage;
 
         private int danceState;
@@ -116,17 +86,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private const double JJ_HANDTHRESH = .001;
         private const double JJ_KNEETHRESH = .001;
 
-        /// <summary>
         /// Initializes a new instance of the MainWindow class.
-        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        /// <summary>
         /// Draws indicators to show which edges are clipping skeleton data
-        /// </summary>
         /// <param name="skeleton">skeleton to draw clipping information for</param>
         /// <param name="drawingContext">drawing context to draw to</param>
         private static void RenderClippedEdges(Skeleton skeleton, DrawingContext drawingContext)
@@ -164,9 +130,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        /// <summary>
         /// Execute startup tasks
-        /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
@@ -216,9 +180,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         }
 
-        /// <summary>
         /// Execute shutdown tasks
-        /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -229,7 +191,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        /// <summary>
         /// Return distance in meters between two joints
         private double GetJointDistance(Skeleton skeleton, JointType jointType0, JointType jointType1)
         {
@@ -336,7 +297,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         }
 
 
-        /// <summary>
         /// Return true if elbows are near torso
         /// (distance between elbows is within 0.3m of distance between shoulders)
         private bool IsValidChknMove1(Skeleton skeleton)
@@ -362,7 +322,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         }
 
-        /// <summary>
         /// Return true if hands are near shoulders
         /// (hands are within 0.2m of shoulders)
         private bool IsValidChknMove2(Skeleton skeleton)
@@ -400,7 +359,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             LogJointPositionY(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index);
             LogJointPositionX(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index);
             LogJointPositionY(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index);
-
+            //get x and y variance of joints
             double HRvarX = HandRightStats_arr[VARcoord,Xcoord];
             double HRvarY = HandRightStats_arr[VARcoord,Ycoord];
             double HLvarX = HandLeftStats_arr[VARcoord,Xcoord];
@@ -424,9 +383,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return isJumpingJackHands && isJumpingJackKnees;
         }
 
-        /// <summary>
         /// Event handler for Kinect sensor's SkeletonFrameReady event
-        /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
@@ -487,9 +444,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        /// <summary>
         /// Draws a skeleton's bones and joints
-        /// </summary>
         /// <param name="skeleton">skeleton to draw</param>
         /// <param name="drawingContext">drawing context to draw to</param>
         private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
@@ -544,9 +499,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        /// <summary>
         /// Maps a SkeletonPoint to lie within our render space and converts to Point
-        /// </summary>
         /// <param name="skelpoint">point to map</param>
         /// <returns>mapped point</returns>
         private Point SkeletonPointToScreen(SkeletonPoint skelpoint)
@@ -557,9 +510,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return new Point(depthPoint.X, depthPoint.Y);
         }
 
-        /// <summary>
         /// Draws a bone line between two joints
-        /// </summary>
         /// <param name="skeleton">skeleton to draw bones from</param>
         /// <param name="drawingContext">drawing context to draw to</param>
         /// <param name="jointType0">joint to start drawing from</param>
@@ -593,9 +544,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
         }
 
-        /// <summary>
         /// Handles the checking or unchecking of the seated mode combo box
-        /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void CheckBoxSeatedModeChanged(object sender, RoutedEventArgs e)
@@ -631,7 +580,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
             Dispatcher.Invoke((Action)delegate() { 
                 if(this.danceState == 0){
@@ -661,9 +609,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             uniformGrid.Visibility = Visibility.Hidden;
         }
 
-        /// <summary>
         /// a onclick function to test how to play music
-        /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         void playSong(object sender, RoutedEventArgs e){
