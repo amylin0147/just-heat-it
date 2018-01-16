@@ -92,6 +92,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private static System.Timers.Timer aTimer;
 
+        /// global index counter 
+        private int index = 0;
+        private const int ARRLEN = 10;
+        /// 2D array for right hand; 2 rows, 10 cols
+        private double[,] HandRight_arr = new double[2, 10];
+        private double HandRightSumX = 0;
+        private double HandRightSumY = 0;
+        private double HandRightX_SoS = 0;
+        private double HandRightY_SoS = 0;
+
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -206,7 +217,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// <summary>
         /// Return distance in meters between two joints
-        private double getJointDistance(Skeleton skeleton, JointType jointType0, JointType jointType1)
+        private double GetJointDistance(Skeleton skeleton, JointType jointType0, JointType jointType1)
         {
             Joint joint0 = skeleton.Joints[jointType0];
             Joint joint1 = skeleton.Joints[jointType1];
@@ -226,18 +237,78 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return dist;
         }
 
+        private double GetJointX(Skeleton skeleton, JointType jointType)
+        {
+            Joint j = skeleton.Joints[jointType];
+            // If we can't find the joint, exit
+            if (j.TrackingState == JointTrackingState.NotTracked) return 0;
+            
+            return j.Position.X;
+        }
+
+        private double GetJointY(Skeleton skeleton, JointType jointType)
+        {
+            Joint j = skeleton.Joints[jointType];
+            // If we can't find the joint, exit
+            if (j.TrackingState == JointTrackingState.NotTracked) return 0;
+            
+            return j.Position.Y;
+        }
+        
+        private void LogHandRightPositionX(Skeleton skeleton, int index)
+        {
+            Joint j = skeleton.Joints[JointType.HandRight];
+            // If we can't find the joint, exit
+            if (j.TrackingState == JointTrackingState.NotTracked) return;
+           
+            double newX = this.GetJointX(skeleton, JointType.HandRight);
+            double oldX =  HandRight_arr[0,index];
+            // update sum
+            HandRightSumX = HandRightSumX - oldX + newX;
+            // update sum of squares
+            double avg = HandRightSumX / (double) ARRLEN;
+            HandRightX_SoS = HandRightX_SoS - Math.Pow((oldX - avg),2.0)
+                                            + Math.Pow((newX - avg),2.0);
+            //log right hand x
+            HandRight_arr[0,index] = newX;
+        }
+
+        private void LogHandRightPositionY(Skeleton skeleton, int index)
+        {
+            Joint j = skeleton.Joints[JointType.HandRight];
+            // If we can't find the joint, exit
+            if (j.TrackingState == JointTrackingState.NotTracked) return;
+           
+            double newY = this.GetJointY(skeleton, JointType.HandRight);
+            double oldY = HandRight_arr[1,index];
+            // update sum
+            System.Console.Write("old: " + oldY + " new: " + newY);
+            HandRightSumY = HandRightSumY - oldY + newY;
+            // update sum of squares
+            double avg = HandRightSumY / (double) ARRLEN;
+            HandRightY_SoS = HandRightY_SoS - Math.Pow((oldY - avg),2.0)
+                                            + Math.Pow((newY - avg),2.0);
+            //log right hand x
+            HandRight_arr[1,index] = newY;
+        }
+
+        private double GetVariance(double SoS, int len)
+        {
+            return SoS / (double) (len - 1);
+        }
+
         /// <summary>
         /// Return true if elbows are near torso
         /// (distance between elbows is within 0.3m of distance between shoulders)
-        private bool isValidChknMove1(Skeleton skeleton)
+        private bool IsValidChknMove1(Skeleton skeleton)
         {
             Joint ShoulderLeft = skeleton.Joints[JointType.ShoulderLeft];
             Joint ShoulderRight = skeleton.Joints[JointType.ShoulderRight];
             Joint ElbowLeft = skeleton.Joints[JointType.ElbowLeft];
             Joint ElbowRight = skeleton.Joints[JointType.ElbowRight];
 
-            double shoulderWidth = this.getJointDistance(skeleton, JointType.ShoulderLeft, JointType.ShoulderRight);
-            double elbowDistance = this.getJointDistance(skeleton, JointType.ElbowLeft, JointType.ElbowRight);
+            double shoulderWidth = this.GetJointDistance(skeleton, JointType.ShoulderLeft, JointType.ShoulderRight);
+            double elbowDistance = this.GetJointDistance(skeleton, JointType.ElbowLeft, JointType.ElbowRight);
 
             // If we can't find either of these joints, exit
             if (shoulderWidth < 0 || elbowDistance < 0) return false;
@@ -255,15 +326,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <summary>
         /// Return true if hands are near shoulders
         /// (hands are within 0.2m of shoulders)
-        private bool isValidChknMove2(Skeleton skeleton)
+        private bool IsValidChknMove2(Skeleton skeleton)
         {
             Joint ShoulderLeft = skeleton.Joints[JointType.ShoulderLeft];
             Joint ShoulderRight = skeleton.Joints[JointType.ShoulderRight];
             Joint HandLeft = skeleton.Joints[JointType.HandLeft];
             Joint HandRight = skeleton.Joints[JointType.HandRight];
 
-            double Left = this.getJointDistance(skeleton, JointType.ShoulderLeft, JointType.HandLeft);
-            double Right = this.getJointDistance(skeleton, JointType.ShoulderRight, JointType.HandRight);
+            double Left = this.GetJointDistance(skeleton, JointType.ShoulderLeft, JointType.HandLeft);
+            double Right = this.GetJointDistance(skeleton, JointType.ShoulderRight, JointType.HandRight);
 
             // If we can't find either of these joints, exit
             if (Left < 0 || Right < 0) return false;
@@ -300,7 +371,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         {
                             if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                System.Console.WriteLine(this.isValidChknMove2(skeleton));
+                                LogHandRightPositionX(skeleton, index);
+                                LogHandRightPositionY(skeleton, index);
+                                
+                                System.Console.Write("index: " + this.index);
+                                System.Console.Write("   sum: " + this.HandRightSumY);
+                                System.Console.Write("   SoS: " + this.HandRightY_SoS);
+                                System.Console.WriteLine("   var: " + this.GetVariance(HandRightY_SoS, ARRLEN));
+
+                                index++;
+                                index = index % ARRLEN;
                             }
                         }
                     }     
