@@ -123,7 +123,7 @@
                   Foreground = "Gray"/>
       <Button x:Name = "button2"
             Content = "Yoga"
-            Click = "onClick2"
+            Click = "playSong"
             Margin = "10"
             Width = "150"
             HorizontalAlignment = "Center"
