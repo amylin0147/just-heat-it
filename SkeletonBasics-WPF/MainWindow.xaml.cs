@@ -94,14 +94,26 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// global index counter 
         private int index = 0;
-        private const int ARRLEN = 10;
-        /// 2D array for right hand; 2 rows, 10 cols
-        private double[,] HandRight_arr = new double[2, 10];
-        private double HandRightSumX = 0;
-        private double HandRightSumY = 0;
-        private double HandRightX_SoS = 0;
-        private double HandRightY_SoS = 0;
+        private const int ARRLEN = 50;
+        private const int Xcoord = 0;
+        private const int Ycoord = 1;
+        private const int SUMcoord = 0;
+        private const int SOScoord = 1;
+        private const int VARcoord = 2;
+        /// 2D array for (x,y) coordinates; 2 rows, 10 cols
+        private double[,] HandRight_arr = new double[2, ARRLEN];
+        private double[,] HandLeft_arr = new double[2, ARRLEN];
+        private double[,] KneeRight_arr = new double[2, ARRLEN];
+        private double[,] KneeLeft_arr = new double[2, ARRLEN];
+        /// (SUM/SOS/VAR , X/Y)
+        private double[,] HandRightStats_arr = new double[3,2];
+        private double[,] HandLeftStats_arr = new double[3,2];
+        private double[,] KneeRightStats_arr = new double[3,2];
+        private double[,] KneeLeftStats_arr = new double[3,2];
 
+        //variance thresholds
+        private const double JJ_HANDTHRESH = .001;
+        private const double JJ_KNEETHRESH = .001;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -237,6 +249,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return dist;
         }
 
+        /// Return X position
         private double GetJointX(Skeleton skeleton, JointType jointType)
         {
             Joint j = skeleton.Joints[jointType];
@@ -246,6 +259,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return j.Position.X;
         }
 
+        /// Return Y position
         private double GetJointY(Skeleton skeleton, JointType jointType)
         {
             Joint j = skeleton.Joints[jointType];
@@ -254,48 +268,71 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
             return j.Position.Y;
         }
-        
-        private void LogHandRightPositionX(Skeleton skeleton, int index)
+
+        /// Return sum of array
+        private double GetArrSum(double[,] arr, int axis)
         {
-            Joint j = skeleton.Joints[JointType.HandRight];
-            // If we can't find the joint, exit
-            if (j.TrackingState == JointTrackingState.NotTracked) return;
-           
-            double newX = this.GetJointX(skeleton, JointType.HandRight);
-            double oldX =  HandRight_arr[0,index];
-            // update sum
-            HandRightSumX = HandRightSumX - oldX + newX;
-            // update sum of squares
-            double avg = HandRightSumX / (double) ARRLEN;
-            HandRightX_SoS = HandRightX_SoS - Math.Pow((oldX - avg),2.0)
-                                            + Math.Pow((newX - avg),2.0);
-            //log right hand x
-            HandRight_arr[0,index] = newX;
+            double sum = 0;
+            for (int i = 0; i < ARRLEN; i++)
+            {
+                sum += arr[axis, i];
+            }
+            return sum;
         }
 
-        private void LogHandRightPositionY(Skeleton skeleton, int index)
+        /// Return sum of squares of array
+        private double GetArrSOS(double[,] arr, int axis, double avg)
         {
-            Joint j = skeleton.Joints[JointType.HandRight];
-            // If we can't find the joint, exit
-            if (j.TrackingState == JointTrackingState.NotTracked) return;
-           
-            double newY = this.GetJointY(skeleton, JointType.HandRight);
-            double oldY = HandRight_arr[1,index];
-            // update sum
-            System.Console.Write("old: " + oldY + " new: " + newY);
-            HandRightSumY = HandRightSumY - oldY + newY;
-            // update sum of squares
-            double avg = HandRightSumY / (double) ARRLEN;
-            HandRightY_SoS = HandRightY_SoS - Math.Pow((oldY - avg),2.0)
-                                            + Math.Pow((newY - avg),2.0);
-            //log right hand x
-            HandRight_arr[1,index] = newY;
+            double sos = 0;
+            for (int i = 0; i < ARRLEN; i++)
+            {
+                sos += Math.Pow((arr[axis, i] - avg), 2.0);
+            }
+            return sos;
         }
 
+        /// Return variance of array
         private double GetVariance(double SoS, int len)
         {
             return SoS / (double) (len - 1);
         }
+
+        /// Update X coordinate, sum, sum of squares, and variance of a joint
+        private void LogJointPositionX(Skeleton skeleton, JointType jointType, 
+                                        double[,] arr, double[,] arrConst, int index)
+        {
+            Joint j = skeleton.Joints[jointType];
+            // If we can't find the joint, exit
+            if (j.TrackingState == JointTrackingState.NotTracked) return;
+            //update array of coordinates
+            arr[Xcoord,index] = this.GetJointX(skeleton, jointType);
+            //update sum
+            arrConst[SUMcoord,Xcoord] = this.GetArrSum(arr,Xcoord);
+            // update sum of squares
+            double avg = arrConst[SUMcoord, Xcoord] / (double) ARRLEN;
+            arrConst[SOScoord,Xcoord] = this.GetArrSOS(arr, Xcoord, avg);
+            //update variance
+            arrConst[VARcoord,Xcoord] = this.GetVariance(arrConst[SOScoord,Xcoord], ARRLEN);
+        }
+
+        /// Update Y coordinate, sum, sum of squares, and variance of a joint
+        private void LogJointPositionY(Skeleton skeleton, JointType jointType, 
+                                        double[,] arr, double[,] arrConst, int index)
+        {
+            Joint j = skeleton.Joints[jointType];
+            // If we can't find the joint, exit
+            if (j.TrackingState == JointTrackingState.NotTracked) return;
+            //update array of coordinates
+            arr[Ycoord,index] = this.GetJointY(skeleton, jointType);
+            //update sum
+            arrConst[SUMcoord,Ycoord] = this.GetArrSum(arr,Ycoord);
+            //update sum of squares
+            double avg = arrConst[SUMcoord, Ycoord] / (double) ARRLEN;
+            arrConst[SOScoord,Ycoord] = this.GetArrSOS(arr, Ycoord, avg);
+            //update variance
+            arrConst[VARcoord,Ycoord] = this.GetVariance(arrConst[SOScoord,Ycoord], ARRLEN);
+        }
+
 
         /// <summary>
         /// Return true if elbows are near torso
@@ -349,6 +386,42 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         }
 
+        private bool isJumpingJack(Skeleton skeleton, int index)
+        {
+            //track hands
+            LogJointPositionX(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index);                                
+            LogJointPositionY(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index);
+            LogJointPositionX(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index);
+            LogJointPositionY(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index);
+            //track knees
+            LogJointPositionX(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index);                                
+            LogJointPositionY(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index);
+            LogJointPositionX(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index);
+            LogJointPositionY(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index);
+
+            double HRvarX = HandRightStats_arr[VARcoord,Xcoord];
+            double HRvarY = HandRightStats_arr[VARcoord,Ycoord];
+            double HLvarX = HandLeftStats_arr[VARcoord,Xcoord];
+            double HLvarY = HandLeftStats_arr[VARcoord,Ycoord];
+            double KRvarX = KneeRightStats_arr[VARcoord,Xcoord];
+            double KRvarY = KneeRightStats_arr[VARcoord,Ycoord];
+            double KLvarX = KneeLeftStats_arr[VARcoord,Xcoord];
+            double KLvarY = KneeLeftStats_arr[VARcoord,Ycoord];
+            bool isJumpingJackHands = (HRvarX > JJ_HANDTHRESH) && (HRvarY > JJ_HANDTHRESH) &&
+                                (HLvarX > JJ_HANDTHRESH) && (HLvarY > JJ_HANDTHRESH);    
+            bool isJumpingJackKnees = (KRvarX > JJ_KNEETHRESH) && (KRvarY > JJ_KNEETHRESH) &&
+                                (KLvarX > JJ_KNEETHRESH) && (KLvarY > JJ_KNEETHRESH);                             
+
+            System.Console.Write(
+                this.index + "\t" + 
+                this.HandRightStats_arr[SUMcoord,Ycoord] + "\t" + 
+                this.HandRightStats_arr[SOScoord,Ycoord] + "\t" + 
+                this.HandRightStats_arr[VARcoord,Ycoord] + "\t" +
+                isJumpingJackHands + "\t" + isJumpingJackKnees + "\t");
+
+            return isJumpingJackHands && isJumpingJackKnees;
+        }
+
         /// <summary>
         /// Event handler for Kinect sensor's SkeletonFrameReady event
         /// </summary>
@@ -371,14 +444,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         {
                             if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                LogHandRightPositionX(skeleton, index);
-                                LogHandRightPositionY(skeleton, index);
-                                
-                                System.Console.Write("index: " + this.index);
-                                System.Console.Write("   sum: " + this.HandRightSumY);
-                                System.Console.Write("   SoS: " + this.HandRightY_SoS);
-                                System.Console.WriteLine("   var: " + this.GetVariance(HandRightY_SoS, ARRLEN));
-
+                                System.Console.WriteLine(" " + this.isJumpingJack(skeleton, index));
                                 index++;
                                 index = index % ARRLEN;
                             }
