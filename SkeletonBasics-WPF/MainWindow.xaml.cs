@@ -11,6 +11,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Windows.Media;
     using System.Timers;
     using System;
+    using System.Media;
     using Microsoft.Kinect;
 
     /// <summary>
@@ -189,6 +190,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
 
             this.danceState = 0;
+
         }
 
         /// <summary>
@@ -512,5 +514,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             uniformGrid2.Visibility = Visibility.Visible;
             uniformGrid.Visibility = Visibility.Hidden;
         }
+
+        /// <summary>
+        /// a onclick function to test how to play music
+        /// </summary>
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        void playSong(object sender, RoutedEventArgs e){
+            //var pathURI = new Uri(@"Song/chickenDance.wav",UriKind.Relative);
+            //var path = pathURI.LocalPath;
+            var path = @"C:\Users\amyli\just-heat-it\SkeletonBasics-WPF\Song\chickenDance.wav";
+            SoundPlayer player = new SoundPlayer(path);
+            player.Load();
+            player.Play();
+        }                                                      
     }
 }
