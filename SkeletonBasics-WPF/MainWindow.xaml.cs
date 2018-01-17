@@ -59,14 +59,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// dance move prompt
         System.Windows.Media.Imaging.BitmapImage danceImage;
-
         private int danceState;
         enum danceStateOptions {ChickenMove1, ChickenMove2, ChickenMove3, ChickenMove4, JumpingJack, Disco};
-
-        SerialPort port;
-        int aserialDebugVar; //for serial demo/debug
-
         private static System.Timers.Timer aTimer;
+
+        //communication with arduino SERIAL 
+        SerialPort port;
+        int serialDebugVar; //for serial demo/debug
+        enum serialMessageOptions {doNotUse, CorrectMove, IncorrectMove};
 
         /// global index counter 
         private int index = 0;
@@ -764,9 +764,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
               //port.Close();
               //move ^ to window close
 
-            serialDebugVar = 0; //for debug
+            serialDebugVar = (int)serialMessageOptions.CorrectMove; //for debug
 
-            //note: run arduino first. open and run visual studio project second. should not be able to open arduino monitor. 
+            /*
+            note: run arduino first. 
+            open and run visual studio project second. 
+            should not be able to open arduino monitor. 
+            */
             }
 
             
@@ -774,13 +778,21 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         }
 
         void onClick3(object sender, RoutedEventArgs e){
-            if(serialDebugVar == 0) {
-                port.Write(new byte[] {0x01}, 0, 1);
-                serialDebugVar = 1;
-                } else {
-                port.Write(new byte[] {0x02}, 0, 1);
-                serialDebugVar = 0;
-}
+            //TODO: run this with arduino and check that it still works. 
+            if(serialDebugVar == (int)serialMessageOptions.CorrectMove) {
+                port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+                serialDebugVar = (int)serialMessageOptions.IncorrectMove;
+            } else {
+                port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+                serialDebugVar = (int)serialMessageOptions.CorrectMove;
+            }
+        }
+
+        void validationCorrectUI(){
+            //change to checkmark picture
+            this.checkOrRed = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images\check.png",UriKind.Relative));
+                    
+            //TODO: signal to arduino
         }
     }
 }
