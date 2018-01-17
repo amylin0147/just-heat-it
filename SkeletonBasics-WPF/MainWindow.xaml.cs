@@ -52,6 +52,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private int danceState;
         enum danceStateOptions {ChickenMove1, ChickenMove2, ChickenMove3, ChickenMove4, JumpingJack, Disco};
         private static System.Timers.Timer aTimer;
+        // time when the current dance move started
+        private DateTime DanceMoveStartTime = new DateTime(1); 
+        private DateTime GracePeriodEndTime = new DateTime(0);
 
         //communication with arduino SERIAL 
         SerialPort port;
@@ -89,6 +92,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private const double DSC_HRTHRESH = .0001;   //variance
         private const double DSC_HLTHRESH = .5;     //dist bw left hand and lef hip
         private const double STRAIGHT_DELTA = .2;
+        private const double AC_YHANDTHRESH = .0001;  //variance for vertical
+        private const double AC_XHANDTHRESH = .0001;  //variance for horizontal
 
 
         /// Initializes a new instance of the MainWindow class.
@@ -432,8 +437,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             bool HandLeftNearHip = HandLeftToHipDist < DSC_HLTHRESH;
             bool isDisco = rh_moving && HandLeftNearHip;
 
-            System.Console.Write(
-                "DISCO" + "\t" + 
+            System.Console.Write("DISCO" + "\t" + 
                 this.HandRightStats_arr[VARcoord,Ycoord] + "\t" +
                 HandLeftToHipDist + "\t" +
                 rh_moving + "\t" + HandLeftNearHip + "\t");
@@ -441,7 +445,33 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return isDisco;
         }
 
-        //private bool isArmCircle(Skeleton skeleton, int index)
+        // returns true if arms are straight and moving vertically and not moving horizontally
+        private bool isArmCircle(Skeleton skeleton, int index)
+        {
+            bool armLeftStraight = isArmStraight(skeleton, JointType.WristLeft, JointType.ElbowLeft, JointType.ShoulderLeft);
+            bool armRightStraight = isArmStraight(skeleton, JointType.WristRight, JointType.ElbowRight, JointType.ShoulderRight);
+
+            this.ComputeStats(HandRight_arr, HandRightStats_arr, Xcoord);
+            this.ComputeStats(HandLeft_arr, HandLeftStats_arr, Xcoord);
+            this.ComputeStats(HandRight_arr, HandRightStats_arr, Ycoord);
+            this.ComputeStats(HandLeft_arr, HandLeftStats_arr, Ycoord);
+
+            double HRvarX = HandRightStats_arr[VARcoord, Xcoord];
+            double HRvarY = HandRightStats_arr[VARcoord, Ycoord];
+            double HLvarX = HandLeftStats_arr[VARcoord, Xcoord];
+            double HLvarY = HandLeftStats_arr[VARcoord, Ycoord];
+
+            bool straightArms = armRightStraight && armLeftStraight;
+            bool vertMvt = (HRvarY > AC_YHANDTHRESH) && (HLvarY > AC_YHANDTHRESH);
+            bool horzMvt = (HRvarX < AC_XHANDTHRESH) && (HLvarX < AC_XHANDTHRESH);
+            bool isArmCircle = straightArms && vertMvt && horzMvt;                                
+
+            System.Console.Write("AC" + "\t" +
+                HRvarY + "\t" + HLvarY + "\t" + HRvarX + "\t" + HLvarX + "\t" +
+                straightArms + "\t" + vertMvt + "\t" + horzMvt + "\t" + isArmCircle);
+
+            return isArmCircle;
+        }
 
         //log coordinates of all joints
         private void TrackJoints(Skeleton skeleton, int index)
@@ -498,6 +528,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     {
                         foreach (Skeleton skeleton in skeletons)
                         {
+                            if (DateTime.Compare(DanceMoveStartTime,GracePeriodEndTime) > 0)
+                            {
+                                System.Console.WriteLine(DateTime.Now);
+                                DanceMoveStartTime = DateTime.Now;
+                                GracePeriodEndTime = DanceMoveStartTime.AddSeconds(2.0);
+                            }
                             if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                             {
                                 this.TrackJoints(skeleton, index);
