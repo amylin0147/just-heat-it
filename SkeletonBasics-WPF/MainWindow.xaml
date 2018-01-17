@@ -116,7 +116,7 @@
     <UniformGrid Grid.Column="0" Columns="1" Rows="2" Name="uniformGrid" >
       <Button x:Name = "button1"
                   Content = "Dance"
-                  Click = "onClick2"
+                  Click = "onClick1"
                   Margin = "10"
                   Width = "150"
                   HorizontalAlignment = "Center"

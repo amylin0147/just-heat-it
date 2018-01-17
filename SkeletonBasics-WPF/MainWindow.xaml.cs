@@ -60,11 +60,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         System.Windows.Media.Imaging.BitmapImage danceImage;
 
         private int danceState;
+        enum danceStateOptions {ChickenMove1, ChickenMove2, ChickenMove3, ChickenMove4, JumpingJack, Disco};
 
         private static System.Timers.Timer aTimer;
 
         /// global index counter 
         private int index = 0;
+        //private bool endOfRow = false;
         private const int ARRLEN = 50;
         private const int Xcoord = 0;
         private const int Ycoord = 1;
@@ -83,8 +85,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private double[,] KneeLeftStats_arr = new double[3,2];
 
         //variance thresholds
-        private const double JJ_HANDTHRESH = .001;
-        private const double JJ_KNEETHRESH = .001;
+        private const double JJ_HANDTHRESH = .0001;  //variance
+        private const double JJ_KNEETHRESH = .0000001;  //variance
+        private const double DSC_HRTHRESH = .0001;   //variance
+        private const double DSC_HLTHRESH = .5;     //dist bw left hand and lef hip
+        private const double STRAIGHT_DELTA = .2;
+
 
         /// Initializes a new instance of the MainWindow class.
         public MainWindow()
@@ -269,16 +275,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             if (j.TrackingState == JointTrackingState.NotTracked) return;
             //update array of coordinates
             arr[Xcoord,index] = this.GetJointX(skeleton, jointType);
-            //update sum
-            arrConst[SUMcoord,Xcoord] = this.GetArrSum(arr,Xcoord);
-            // update sum of squares
-            double avg = arrConst[SUMcoord, Xcoord] / (double) ARRLEN;
-            arrConst[SOScoord,Xcoord] = this.GetArrSOS(arr, Xcoord, avg);
-            //update variance
-            arrConst[VARcoord,Xcoord] = this.GetVariance(arrConst[SOScoord,Xcoord], ARRLEN);
         }
 
-        /// Update Y coordinate, sum, sum of squares, and variance of a joint
+        /// Update Y coordinate of a joint
         private void LogJointPositionY(Skeleton skeleton, JointType jointType, 
                                         double[,] arr, double[,] arrConst, int index)
         {
@@ -286,14 +285,40 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             // If we can't find the joint, exit
             if (j.TrackingState == JointTrackingState.NotTracked) return;
             //update array of coordinates
-            arr[Ycoord,index] = this.GetJointY(skeleton, jointType);
+            arr[Ycoord,index] = this.GetJointY(skeleton, jointType);           
+        }
+
+        // compute sum, sum of squares, and variance of a joint
+        private void ComputeStats(double[,] arr, double[,] arrConst, int axis)
+        {
             //update sum
-            arrConst[SUMcoord,Ycoord] = this.GetArrSum(arr,Ycoord);
+            arrConst[SUMcoord, axis] = this.GetArrSum(arr, axis);
             //update sum of squares
-            double avg = arrConst[SUMcoord, Ycoord] / (double) ARRLEN;
-            arrConst[SOScoord,Ycoord] = this.GetArrSOS(arr, Ycoord, avg);
+            double avg = arrConst[SUMcoord, axis] / (double)ARRLEN;
+            arrConst[SOScoord, axis] = this.GetArrSOS(arr, axis, avg);
             //update variance
-            arrConst[VARcoord,Ycoord] = this.GetVariance(arrConst[SOScoord,Ycoord], ARRLEN);
+            arrConst[VARcoord, axis] = this.GetVariance(arrConst[SOScoord, axis], ARRLEN);
+        }
+
+        private double GetSlope(double x1, double x2, double y1, double y2)
+        {
+            return (y1 - y2) / (x1 - x2);
+        }
+
+        /// Return true if slope from elbow to wrist is near slope from shoulder to elbow
+        private bool isArmStraight(Skeleton skeleton, JointType wrist, JointType elbow, JointType shoulder)
+        {
+            double wristX = GetJointX(skeleton, wrist);
+            double wristY = GetJointY(skeleton, wrist);
+            double elbowX = GetJointX(skeleton, elbow);
+            double elbowY = GetJointY(skeleton, elbow);
+            double shoulderX = GetJointX(skeleton, shoulder);
+            double shoulderY = GetJointY(skeleton, shoulder);
+
+            double slope1 = GetSlope(wristX, elbowX, wristY, elbowY);
+            double slope2 = GetSlope(elbowX, shoulderX, elbowY, shoulderY);
+
+            return System.Math.Abs(slope1 - slope2) < STRAIGHT_DELTA;
         }
 
 
@@ -347,18 +372,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         }
 
-        private bool isJumpingJack(Skeleton skeleton, int index)
+        private bool isJumpingJack()
         {
-            //track hands
-            LogJointPositionX(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index);                                
-            LogJointPositionY(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index);
-            LogJointPositionX(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index);
-            LogJointPositionY(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index);
-            //track knees
-            LogJointPositionX(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index);                                
-            LogJointPositionY(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index);
-            LogJointPositionX(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index);
-            LogJointPositionY(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index);
+            //update sum, sum of squares, and variance
+            //hands
+            this.ComputeStats(HandRight_arr, HandRightStats_arr, Xcoord);
+            this.ComputeStats(HandLeft_arr, HandLeftStats_arr, Xcoord);
+            this.ComputeStats(HandRight_arr, HandRightStats_arr, Ycoord);
+            this.ComputeStats(HandLeft_arr, HandLeftStats_arr, Ycoord);
+            //knees
+            this.ComputeStats(KneeRight_arr, HandRightStats_arr, Xcoord);
+            this.ComputeStats(KneeLeft_arr, HandLeftStats_arr, Xcoord);
+            this.ComputeStats(KneeRight_arr, HandRightStats_arr, Ycoord);
+            this.ComputeStats(KneeLeft_arr, HandLeftStats_arr, Ycoord);
+            
             //get x and y variance of joints
             double HRvarX = HandRightStats_arr[VARcoord,Xcoord];
             double HRvarY = HandRightStats_arr[VARcoord,Ycoord];
@@ -373,14 +400,75 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             bool isJumpingJackKnees = (KRvarX > JJ_KNEETHRESH) && (KRvarY > JJ_KNEETHRESH) &&
                                 (KLvarX > JJ_KNEETHRESH) && (KLvarY > JJ_KNEETHRESH);                             
 
-            System.Console.Write(
-                this.index + "\t" + 
+            System.Console.WriteLine(
+                "JJ" + "\t" + 
                 this.HandRightStats_arr[SUMcoord,Ycoord] + "\t" + 
                 this.HandRightStats_arr[SOScoord,Ycoord] + "\t" + 
                 this.HandRightStats_arr[VARcoord,Ycoord] + "\t" +
                 isJumpingJackHands + "\t" + isJumpingJackKnees + "\t");
 
             return isJumpingJackHands && isJumpingJackKnees;
+        }
+
+        /// right hand is moving and left hand is near hip
+        private bool isDisco(Skeleton skeleton)
+        {
+            //update sum, sum of squares, and variance for right hand
+            this.ComputeStats(HandRight_arr, HandRightStats_arr, Xcoord);
+            this.ComputeStats(HandRight_arr, HandRightStats_arr, Ycoord);
+
+            //get x and y variance of joints
+            double HRvarX = HandRightStats_arr[VARcoord,Xcoord];
+            double HRvarY = HandRightStats_arr[VARcoord,Ycoord];
+
+            bool rh_moving = (HRvarX > DSC_HRTHRESH) && (HRvarY > DSC_HRTHRESH);
+            double HandLeftToHipDist = this.GetJointDistance(skeleton, JointType.HandLeft, JointType.HipLeft);
+            bool HandLeftNearHip = HandLeftToHipDist < DSC_HLTHRESH;
+            bool isDisco = rh_moving && HandLeftNearHip;
+
+            System.Console.Write(
+                "DISCO" + "\t" + 
+                this.HandRightStats_arr[VARcoord,Ycoord] + "\t" +
+                HandLeftToHipDist + "\t" +
+                rh_moving + "\t" + HandLeftNearHip + "\t");
+
+            return isDisco;
+        }
+
+        //private bool isArmCircle(Skeleton skeleton, int index)
+
+        //log coordinates of all joints
+        private void TrackJoints(Skeleton skeleton, int index)
+        {
+            //track hands
+            LogJointPositionX(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index);
+            LogJointPositionY(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index);
+            LogJointPositionX(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index);
+            LogJointPositionY(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index);
+            //track knees
+            LogJointPositionX(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index);
+            LogJointPositionY(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index);
+            LogJointPositionX(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index);
+            LogJointPositionY(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index);
+        }
+
+        private void validate(Skeleton skeleton)
+        {
+            bool isCorrect = false;
+            System.Console.WriteLine(this.danceState);
+
+            switch(this.danceState){
+                case (int)danceStateOptions.JumpingJack:
+                    System.Console.WriteLine("is jumping jack!");
+                    isCorrect = isJumpingJack();
+                    break;
+                case (int)danceStateOptions.Disco:
+                    System.Console.WriteLine("is disco!");
+                    isCorrect = isDisco(skeleton);
+                    break;
+                default: 
+                    break;
+            }
         }
 
         /// Event handler for Kinect sensor's SkeletonFrameReady event
@@ -403,9 +491,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         {
                             if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                System.Console.WriteLine(" " + this.isJumpingJack(skeleton, index));
+                                this.TrackJoints(skeleton, index);
+                                if (index == ARRLEN-1) this.validate(skeleton);
                                 index++;
                                 index = index % ARRLEN;
+                                //System.Console.WriteLine(index);
                             }
                         }
                     }     
@@ -566,10 +656,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         void onClick1(object sender, RoutedEventArgs e)
         {
             //hide button
+            uniformGrid2.Visibility = Visibility.Visible;
+            uniformGrid.Visibility = Visibility.Hidden;
 
             //start dance
+            this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png", UriKind.Relative));
+            this.danceState = (int)danceStateOptions.JumpingJack;
+            DanceMove.Source = this.danceImage;
             // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(2000);
+            aTimer = new System.Timers.Timer(3000);
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
@@ -582,19 +677,25 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
             Dispatcher.Invoke((Action)delegate() { 
-                if(this.danceState == 0){
+                /*
+                if(this.danceState == (int)danceStateOptions.ChickenMove1){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance2.png",UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.ChickenMove2;
+                } else if(this.danceState == (int)danceStateOptions.ChickenMove2){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance3.png",UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.ChickenMove3;
+                } else if(this.danceState == (int)danceStateOptions.ChickenMove3){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance4.png",UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.ChickenMove4;
+                } else { //if(this.danceState == danceStateOptions.ChickenMove4){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png",UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.ChickenMove1;
+                }
+                */
+
+                //leave as chicken picture until get jumping jack picture
                 this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance2.png",UriKind.Relative));
-                this.danceState = 1;
-            } else if(this.danceState == 1){
-                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance3.png",UriKind.Relative));
-                this.danceState = 2;
-            } else if(this.danceState == 2){
-                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance4.png",UriKind.Relative));
-                this.danceState = 3;
-            } else { //if(this.danceState == 3){
-                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png",UriKind.Relative));
-                this.danceState = 0;
-            }
+                this.danceState = (int)danceStateOptions.Disco;
                 DanceMove.Source = this.danceImage;
             });
 
