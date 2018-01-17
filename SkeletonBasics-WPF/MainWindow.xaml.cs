@@ -525,8 +525,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     {
                         foreach (Skeleton skeleton in skeletons)
                         {
-                            if (DateTime.Compare(DanceMoveStartTime,GracePeriodEndTime) > 0)
+                            //System.Console.WriteLine(DanceMoveStartTime + "\t" + GracePeriodEndTime);
+                            if (DateTime.Compare(DateTime.Now, GracePeriodEndTime) > 0)
                             {
+                                //current time is after the grace period end time
                                 System.Console.WriteLine(DateTime.Now);
                                 DanceMoveStartTime = DateTime.Now;
                                 GracePeriodEndTime = DanceMoveStartTime.AddSeconds(2.0);
