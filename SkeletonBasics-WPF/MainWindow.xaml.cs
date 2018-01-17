@@ -13,6 +13,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System;
     using System.Media;
     using Microsoft.Kinect;
+    using System.IO.Ports;
 
     /// Interaction logic for MainWindow.xaml
     public partial class MainWindow : Window
@@ -61,6 +62,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private int danceState;
         enum danceStateOptions {ChickenMove1, ChickenMove2, ChickenMove3, ChickenMove4, JumpingJack, Disco};
+
+        SerialPort port;
+        int aserialDebugVar; //for serial demo/debug
 
         private static System.Timers.Timer aTimer;
 
@@ -184,6 +188,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             this.danceState = 0;
 
+            //serial
+            
+            talkToArduino();
+
         }
 
         /// Execute shutdown tasks
@@ -195,6 +203,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 this.sensor.Stop();
             }
+
+            // Close the port
+            port.Close();
         }
 
         /// Return distance in meters between two joints
@@ -720,6 +731,56 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             SoundPlayer player = new SoundPlayer(path);
             player.Load();
             player.Play();
-        }                                                      
+        }    
+        
+        void talkToArduino(){
+            //SerialPort serialPort1 = new SerialPort();
+            //serialPort1.Open();
+
+            // Get a list of serial port names.
+            string[] ports = SerialPort.GetPortNames();
+
+             System.Diagnostics.Debug.WriteLine("The following serial ports were found:");
+
+            // Display each port name to the console.
+            foreach(string portName in ports)
+            {
+                 System.Diagnostics.Debug.WriteLine(portName);
+
+                // Instantiate the communications
+              // port with some basic settings
+              port = new SerialPort(portName, 9600, Parity.None, 8, StopBits.One);
+  
+              // Open the port for communications
+              port.Open();
+  
+              // Write a string
+              //port.Write("Hello World");
+  
+              // Write a set of bytes
+              //port.Write(new byte[] {0x01}, 0, 1);
+  
+              // Close the port
+              //port.Close();
+              //move ^ to window close
+
+            serialDebugVar = 0; //for debug
+
+            //note: run arduino first. open and run visual studio project second. should not be able to open arduino monitor. 
+            }
+
+            
+            //Console.ReadLine();
+        }
+
+        void onClick3(object sender, RoutedEventArgs e){
+            if(serialDebugVar == 0) {
+                port.Write(new byte[] {0x01}, 0, 1);
+                serialDebugVar = 1;
+                } else {
+                port.Write(new byte[] {0x02}, 0, 1);
+                serialDebugVar = 0;
+}
+        }
     }
 }
