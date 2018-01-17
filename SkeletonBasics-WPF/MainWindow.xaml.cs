@@ -13,56 +13,52 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System;
     using System.Media;
     using Microsoft.Kinect;
+    using System.IO.Ports;
 
     /// Interaction logic for MainWindow.xaml
     public partial class MainWindow : Window
     {
         /// Width of output drawing
         private const float RenderWidth = 640.0f;
-
         /// Height of our output drawing
         private const float RenderHeight = 480.0f;
-
         /// Thickness of drawn joint lines
         private const double JointThickness = 5;//3;
-
         /// Thickness of body center ellipse
         private const double BodyCenterThickness = 10;
-
         /// Thickness of clip edge rectangles
         private const double ClipBoundsThickness = 10;
-
         /// Brush used to draw skeleton center point
         private readonly Brush centerPointBrush = Brushes.Blue;
-
         /// Brush used for drawing joints that are currently tracked
         private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
-
         /// Brush used for drawing joints that are currently inferred
         private readonly Brush inferredJointBrush = Brushes.Yellow;
-
         /// Pen used for drawing bones that are currently tracked
         private readonly Pen trackedBonePen = new Pen(Brushes.Green, 16);//6);
-
         /// Pen used for drawing bones that are currently inferred
         private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 16);//1);
-
         /// Active Kinect sensor
         private KinectSensor sensor;
-
         /// Drawing group for skeleton rendering output
         private DrawingGroup drawingGroup;
-
         /// Drawing image that we will display
         private DrawingImage imageSource;
 
+        /*** GLOBALS ADDED BY AMY ***/
+
         /// dance move prompt
         System.Windows.Media.Imaging.BitmapImage danceImage;
-
         private int danceState;
         enum danceStateOptions {ChickenMove1, ChickenMove2, ChickenMove3, ChickenMove4, JumpingJack, Disco};
-
         private static System.Timers.Timer aTimer;
+
+        //communication with arduino SERIAL 
+        SerialPort port;
+        int serialDebugVar; //for serial demo/debug
+        enum serialMessageOptions {doNotUse, CorrectMove, IncorrectMove};
+
+        /*** GLOBALS ADDED BY IRENE ***/
 
         /// global index counter 
         private int index = 0;
@@ -184,6 +180,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             this.danceState = 0;
 
+            //serial
+            
+            arduinoSetup();
+
         }
 
         /// Execute shutdown tasks
@@ -195,6 +195,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 this.sensor.Stop();
             }
+
+            // Close the port
+            if(port != null) port.Close();
         }
 
         /// Return distance in meters between two joints
@@ -469,6 +472,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 default: 
                     break;
             }
+
+            if(isCorrect){validationCorrectUI();}
+            else{validationIncorrectUI();} 
         }
 
         /// Event handler for Kinect sensor's SkeletonFrameReady event
@@ -720,6 +726,73 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             SoundPlayer player = new SoundPlayer(path);
             player.Load();
             player.Play();
-        }                                                      
+        }    
+        
+        void arduinoSetup(){
+            // Get a list of serial port names.
+            string[] ports = SerialPort.GetPortNames();
+
+            //if ports is empty. print error
+            if(ports.Length == 0) {System.Diagnostics.Debug.WriteLine("[arduinoSetup] ERROR: no ports found");}
+
+            //System.Diagnostics.Debug.WriteLine("The following serial ports were found:");
+
+            // Display each port name to the console.
+            foreach(string portName in ports) {
+                //System.Diagnostics.Debug.WriteLine(portName);
+                
+                // Instantiate the communications
+                // port with some basic settings
+                port = new SerialPort(portName, 9600, Parity.None, 8, StopBits.One);
+
+                // Open the port for communications
+                port.Open();
+
+                // Write a string
+                //port.Write("Hello World");
+
+                // Write a set of bytes
+                //port.Write(new byte[] {0x01}, 0, 1);
+
+                // Close the port
+                //port.Close();
+                //move ^ to window close
+
+                serialDebugVar = (int)serialMessageOptions.CorrectMove; //for debug
+
+                /*
+                note: run arduino first. 
+                open and run visual studio project second. 
+                should not be able to open arduino monitor. 
+                */
+            }
+        }
+
+        void onClick3(object sender, RoutedEventArgs e){
+            //TODO: run this with arduino and check that it still works. 
+            if(serialDebugVar == (int)serialMessageOptions.CorrectMove) {
+                port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
+                serialDebugVar = (int)serialMessageOptions.IncorrectMove;
+            } else {
+                port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+                serialDebugVar = (int)serialMessageOptions.CorrectMove;
+            }
+        }
+
+        void validationCorrectUI(){
+            //change to checkmark picture
+            this.checkOrRed.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images\check.png",UriKind.Relative));
+                    
+            //signal to arduino
+            port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+        }
+
+        void validationIncorrectUI(){
+            //change to checkmark picture
+            this.checkOrRed.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images\red.jpeg",UriKind.Relative));
+                    
+            //signal to arduino
+            port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
+        }
     }
 }
