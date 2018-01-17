@@ -58,6 +58,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         int serialDebugVar; //for serial demo/debug
         enum serialMessageOptions {doNotUse, CorrectMove, IncorrectMove};
 
+        //debug globals
+        private bool ARDUINO_CONNECTED = true;
+
         /*** GLOBALS ADDED BY IRENE ***/
 
         /// global index counter 
@@ -182,7 +185,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             //serial
             
-            arduinoSetup();
+            if(ARDUINO_CONNECTED) arduinoSetup();
 
         }
 
@@ -771,10 +774,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         void onClick3(object sender, RoutedEventArgs e){
             //TODO: run this with arduino and check that it still works. 
             if(serialDebugVar == (int)serialMessageOptions.CorrectMove) {
-                port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
+                if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
                 serialDebugVar = (int)serialMessageOptions.IncorrectMove;
             } else {
-                port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+                if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
                 serialDebugVar = (int)serialMessageOptions.CorrectMove;
             }
         }
@@ -784,7 +787,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.checkOrRed.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images\check.png",UriKind.Relative));
                     
             //signal to arduino
-            port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+            if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
         }
 
         void validationIncorrectUI(){
@@ -792,7 +795,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.checkOrRed.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images\red.jpeg",UriKind.Relative));
                     
             //signal to arduino
-            port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
+            if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
         }
     }
 }
