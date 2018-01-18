@@ -51,6 +51,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         System.Windows.Media.Imaging.BitmapImage danceImage;
         private int danceState;
         enum danceStateOptions {JumpingJack, ArmCircle, Disco, Cabbage, Floss};
+        private int timePerDanceMove = 7000; //milliseconds
         private static System.Timers.Timer aTimer;
         // time when the current dance move started
         private DateTime GracePeriodEndTime = new DateTime(0);
@@ -59,6 +60,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         SerialPort port;
         int serialDebugVar; //for serial demo/debug
         enum serialMessageOptions {doNotUse, CorrectMove, IncorrectMove};
+
+        //music
+        SoundPlayer player;
 
         //debug globals
         private bool ARDUINO_CONNECTED = false;
@@ -193,6 +197,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             //serial
             
             if(ARDUINO_CONNECTED) arduinoSetup();
+
+            var path = @"C:\Users\amyli\just-heat-it\SkeletonBasics-WPF\Song\blurredlines.wav";
+            player = new SoundPlayer(path);
+            player.Load();
 
         }
 
@@ -715,13 +723,14 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png", UriKind.Relative));
             this.danceState = (int)danceStateOptions.JumpingJack;
             DanceMove.Source = this.danceImage;
+            player.Play();
             // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(7000); //7 sec
+            aTimer = new System.Timers.Timer(200); 
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
-            aTimer.AutoReset = true;
-            aTimer.Enabled = true;
-            //aTimer.Start();
+            aTimer.AutoReset = false;
+            //aTimer.Enabled = true;
+            aTimer.Start();
 
         }
 
@@ -737,16 +746,23 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.danceState = (int)danceStateOptions.Disco;
                 } else if(this.danceState == (int)danceStateOptions.Disco){
                     this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png",UriKind.Relative));
-                    this.danceState = (int)danceStateOptions.JumpingJack;
-                    //.danceState = (int)danceStateOptions.Cabbage;
-                } else { //if(this.danceState == danceStateOptions.ChickenMove4){
-                    //TODO: this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png",UriKind.Relative));
+                    //this.danceState = (int)danceStateOptions.JumpingJack;
+                    this.danceState = (int)danceStateOptions.Cabbage;
+                } else { //if(this.danceState == danceStateOptions.Cabbage){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/cabbage.png",UriKind.Relative));
                     this.danceState = (int)danceStateOptions.JumpingJack;
                 }
 
                 DanceMove.Source = this.danceImage;
                 //set grace period
                 GracePeriodEndTime = DateTime.Now.AddSeconds(2.0);
+
+                aTimer = new System.Timers.Timer(timePerDanceMove); 
+                // Hook up the Elapsed event for the timer. 
+                aTimer.Elapsed += OnTimedEvent;
+                aTimer.AutoReset = false;
+                //aTimer.Enabled = true;
+                aTimer.Start();
             });
         }
 
@@ -761,7 +777,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         void playSong(object sender, RoutedEventArgs e){
             //var pathURI = new Uri(@"Song/chickenDance.wav",UriKind.Relative);
             //var path = pathURI.LocalPath;
-            var path = @"C:\Users\amyli\just-heat-it\SkeletonBasics-WPF\Song\chickenDance.wav";
+            var path = @"C:\Users\amyli\just-heat-it\SkeletonBasics-WPF\Song\blurredlines.wav";
             SoundPlayer player = new SoundPlayer(path);
             player.Load();
             player.Play();
