@@ -897,5 +897,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             //if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
             player.Stop();
         }
+
+        //switch from game play screen to lose screen
+        void switchToLosePage(){
+            uniformGrid2.Visibility = Visibility.Hidden;
+            GameLoseScreen.Visibility = Visibility.Visible;
+        }
     }
 }
