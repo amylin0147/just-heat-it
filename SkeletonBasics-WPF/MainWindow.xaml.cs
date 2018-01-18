@@ -71,6 +71,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// global index counter 
         private int index = 0;
+        private int lives = 3;
         //private bool endOfRow = false;
         private const int ARRLEN = 50;
         private const int Xcoord = 0;
@@ -525,7 +526,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
 
             if(isCorrect){validationCorrectUI();}
-            else{validationIncorrectUI();} 
+            else{validationIncorrectUI();lives -= 1; } 
         }
 
         /// Event handler for Kinect sensor's SkeletonFrameReady event
