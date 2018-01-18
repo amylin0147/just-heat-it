@@ -919,5 +919,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             aTimer.Stop();
             player.Stop();
         }
+
+        //switch from game play screen to lose screen
+        void switchToLosePage(){
+            uniformGrid2.Visibility = Visibility.Hidden;
+            GameLoseScreen.Visibility = Visibility.Visible;
+        }
     }
 }
