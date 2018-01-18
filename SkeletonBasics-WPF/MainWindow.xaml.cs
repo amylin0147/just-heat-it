@@ -351,10 +351,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.ComputeStats(HandRight_arr, HandRightStats_arr, Ycoord);
             this.ComputeStats(HandLeft_arr, HandLeftStats_arr, Ycoord);
             //knees
-            this.ComputeStats(KneeRight_arr, HandRightStats_arr, Xcoord);
-            this.ComputeStats(KneeLeft_arr, HandLeftStats_arr, Xcoord);
-            this.ComputeStats(KneeRight_arr, HandRightStats_arr, Ycoord);
-            this.ComputeStats(KneeLeft_arr, HandLeftStats_arr, Ycoord);
+            this.ComputeStats(KneeRight_arr, KneeRightStats_arr, Xcoord);
+            this.ComputeStats(KneeLeft_arr, KneeLeftStats_arr, Xcoord);
+            this.ComputeStats(KneeRight_arr, KneeRightStats_arr, Ycoord);
+            this.ComputeStats(KneeLeft_arr, KneeLeftStats_arr, Ycoord);
             
             //get x and y variance of joints
             double HRvarX = HandRightStats_arr[VARcoord,Xcoord];
