@@ -101,6 +101,7 @@
   <ItemGroup>
     <Resource Include="Images\check.png" />
     <Resource Include="Images\red.jpeg" />
+    <Resource Include="Images\heart.jpg" />
     <Resource Include="Images\moves\armcircle.png" />
     <Resource Include="Images\moves\disco.png" />
     <Resource Include="Images\moves\jumpingjack.png" />
