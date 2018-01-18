@@ -46,79 +46,95 @@
         </Style>
     </Window.Resources>
 
-  <Grid Margin="10 100 10 100">
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" />
-    </Grid.ColumnDefinitions>
+    <Grid Margin="10 50 10 50">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-    <UniformGrid Grid.Column="0" Columns="1" Rows="1" Name="uniformGrid" >
-      <Button x:Name = "button1"
-                  Content = "START"
-                  Click = "gameGracePeriod"
-                  Margin = "10"
-                  Width = "400"
-                  HorizontalAlignment = "Center"
-                  FontSize = "30"
-                  Foreground = "Black"
-                  Background = "Gray"/>
-      <!--<Button x:Name = "button2"
-            Content = "Yoga"
-            Click = "onClick3"
-            Margin = "10"
-            Width = "400"
-            HorizontalAlignment = "Center"
-            Foreground = "Gray"/>-->
-    </UniformGrid>
+        <!-- Start Screen -->
+        <UniformGrid Grid.Column="0" Columns="1" Rows="1" Name="uniformGrid" >
+            <Button x:Name = "button1"
+                Content = "START"
+                Click = "gameGracePeriod"
+                Margin = "10"
+                Width = "400"
+                HorizontalAlignment = "Center"
+                FontSize = "30"
+                Foreground = "Black"
+                Background = "Gray"
+            />
 
-    <!-- Game Grace screen -->
-    <Grid Grid.Column="0" Visibility="Hidden" Name="GameGraceText" >
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-    </Grid.RowDefinitions>
-      <TextBlock Grid.Row="0" Name="text" Margin="40 0 0 0" VerticalAlignment="Center"
-                     Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" 
-                     FontSize="36" Visibility="Visible">Start the microwave! </TextBlock>
-      <TextBlock Grid.Row="1" Name="GameGraceCountdown" Margin="90 0 0 0" VerticalAlignment="Center"
-                     Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" 
-                     FontSize="150" Visibility="Hidden">GO!</TextBlock>
+        </UniformGrid>
+
+        <!-- Game Grace screen -->
+        <Grid Grid.Column="0" Visibility="Hidden" Name="GameGraceText" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Name="text" 
+                Margin="40 20 0 0" 
+                VerticalAlignment="Center"
+                Foreground="{StaticResource MediumGreyBrush}" 
+                FontFamily="Segoe UI" 
+                FontSize="36" 
+                Visibility="Visible">Start the microwave!</TextBlock>
+            <TextBlock Grid.Row="1" Name="GameGraceCountdown" 
+                Margin="90 0 0 0" 
+                VerticalAlignment="Center"         
+                Foreground="{StaticResource MediumGreyBrush}" 
+                FontFamily="Segoe UI" 
+                FontSize="150" 
+                Visibility="Hidden">GO!</TextBlock>
+        </Grid>
+
+        <!-- Game play screen -->
+        <Grid Grid.Column="0" Visibility="Hidden" Name="uniformGrid2" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Visibility="Visible" Name="uniformGrid3" >
+                <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Image Grid.Row="0" Name="checkOrRed" Source="Images\check.png" 
+                        Stretch="Uniform" Height="81" Width="81" Margin="0 5 0 0" />
+
+                <UniformGrid Grid.Row="1" Name="Hearts" Rows="1" Columns="3" Margin="5 10 0 20">
+                    <Image Grid.Column="0" x:Name="Heart1" Source="Images\heart.jpg"
+                            Stretch="Uniform" Height="50" Width="50" HorizontalAlignment="Center" Margin="0 0 0 0" />
+                    <Image Grid.Column="1" x:Name="Heart2" Source="Images\heart.jpg"
+                            Stretch="Uniform" Height="50" Width="50" HorizontalAlignment="Center" Margin="0 0 0 0" />
+                    <Image Grid.Column="2" x:Name="Heart3" Source="Images\heart.jpg"
+                            Stretch="Uniform" Height="50" Width="50" HorizontalAlignment="Center" Margin="0 0 0 0" />
+                </UniformGrid>
+
+                <Image Grid.Row="2" x:Name="DanceMove" Source="Images\moves\jumpingjack.png"
+                        Stretch="Uniform" HorizontalAlignment="Center" Margin="10 0 10 0" />
+            </Grid>
+
+            <Button x:Name = "button3"
+                Content = "New Game"
+                Click = "newGame"
+                Margin = "10"
+                Width = "150"
+                HorizontalAlignment = "Center"
+                Foreground = "Gray"
+                Grid.Row="3"
+            />
+        </Grid>
+
+        <Viewbox Grid.Column="1" Stretch="Uniform" HorizontalAlignment="Center">
+            <Image Name="Image" Width="640" Height="480"/>
+        </Viewbox>
     </Grid>
-
-    <!-- Game play screen -->
-    <Grid Grid.Column="0" Visibility="Hidden" Name="uniformGrid2" >
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*" />
-      <RowDefinition Height="Auto" />
-    </Grid.RowDefinitions>
-      <Grid Grid.Row="0" Visibility="Visible" Name="uniformGrid3" >
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Image Grid.Row="0" Name="checkOrRed" Source="Images\check.png" 
-               Stretch="Uniform" Height="81" Width="81" Margin="10 10 10 5" />
-        <!-- <TextBlock Name="timeText" Margin="30 0 0 0" VerticalAlignment="Center"
-                   Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" 
-                   FontSize="18" >Time Left: 60s</TextBlock> -->
-
-        <Image Grid.Row="1" x:Name="DanceMove" Source="Images\moves\dance1.png"
-               Stretch="Uniform" HorizontalAlignment="Center" Margin="10 0 10 0" />
-      </Grid>
-      <Button x:Name = "button3"
-            Content = "New Game"
-            Click = "newGame"
-            Margin = "10"
-            Width = "150"
-            HorizontalAlignment = "Center"
-            Foreground = "Gray"
-            Grid.Row="1"/>
-    </Grid>
-
-    <Viewbox Grid.Column="1" Stretch="Uniform" HorizontalAlignment="Center">
-      <Image Name="Image" Width="640" Height="480"/>
-    </Viewbox>
-  </Grid>
   
   
 </Window>
