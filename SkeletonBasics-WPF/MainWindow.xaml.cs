@@ -587,7 +587,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     foreach (Skeleton skel in skeletons)
                     {
-                        if (skel != null) RenderClippedEdges(skel, dc);
+                        if (skel == null) continue;
+
+                        RenderClippedEdges(skel, dc);
 
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
@@ -898,18 +900,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 //start dance
                 this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png", UriKind.Relative));
-                this.danceState = (int)danceStateOptions.JumpingJack;
+                this.danceState = (int)danceStateOptions.Start;
                 DanceMove.Source = this.danceImage;
             });
 
-                player.Play();
-                // Create a timer with a two second interval.
-                aTimer = new System.Timers.Timer(200); 
-                // Hook up the Elapsed event for the timer. 
-                aTimer.Elapsed += OnTimedEvent;
-                aTimer.AutoReset = false;
-                //aTimer.Enabled = true;
-                aTimer.Start();
+            player.Play();
+            // Create a timer with a two second interval.
+            aTimer = new System.Timers.Timer(200);
+            // Hook up the Elapsed event for the timer. 
+            aTimer.Elapsed += OnTimedEvent;
+            aTimer.AutoReset = false;
+            //aTimer.Enabled = true;
+            aTimer.Start();
+
         }
 
         //turns off microwave
