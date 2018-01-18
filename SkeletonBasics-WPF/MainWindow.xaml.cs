@@ -712,27 +712,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
         }
 
-        void onClick1(object sender, RoutedEventArgs e)
-        {
-            //hide button
-            uniformGrid2.Visibility = Visibility.Visible;
-            uniformGrid.Visibility = Visibility.Hidden;
-
-            //start dance
-            this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png", UriKind.Relative));
-            this.danceState = (int)danceStateOptions.Start;
-            DanceMove.Source = this.danceImage;
-            player.Play();
-            // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(timePerDanceMove); 
-            // Hook up the Elapsed event for the timer. 
-            aTimer.Elapsed += OnTimedEvent;
-            aTimer.AutoReset = false;
-            //aTimer.Enabled = true;
-            aTimer.Start();
-
-        }
-
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
@@ -777,23 +756,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 aTimer.Start();
             });
         }
-
-        void onClick2(object sender, RoutedEventArgs e){
-            uniformGrid2.Visibility = Visibility.Visible;
-            uniformGrid.Visibility = Visibility.Hidden;
-        }
-
-        /// a onclick function to test how to play music
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        void playSong(object sender, RoutedEventArgs e){
-            //var pathURI = new Uri(@"Song/chickenDance.wav",UriKind.Relative);
-            //var path = pathURI.LocalPath;
-            var path = @"C:\Users\amyli\just-heat-it\SkeletonBasics-WPF\Song\blurredlines.wav";
-            SoundPlayer player = new SoundPlayer(path);
-            player.Load();
-            player.Play();
-        }    
         
         void arduinoSetup(){
             string[] ports = SerialPort.GetPortNames();
@@ -814,23 +776,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        void onClick3(object sender, RoutedEventArgs e){
-            //TODO: run this with arduino and check that it still works. 
-            if(serialDebugVar == (int)serialMessageOptions.CorrectMove) {
-                if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
-                serialDebugVar = (int)serialMessageOptions.IncorrectMove;
-            } else {
-                if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
-                serialDebugVar = (int)serialMessageOptions.CorrectMove;
-            }
-        }
-
         void validationCorrectUI(){
             //change to checkmark picture
             this.checkOrRed.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images\check.png",UriKind.Relative));
-                    
-            //signal to arduino
-            if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
         }
 
         void validationIncorrectUI(){
@@ -847,36 +795,25 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         }
 
         void gameGracePeriod(object sender, RoutedEventArgs e){
-            //hide button
+            //hide start button
             uniformGrid.Visibility = Visibility.Hidden;
+            //show 'microwave ready' text
             GameGraceText.Visibility = Visibility.Visible;
-/*
-            while(countdown > 0){
-                aTimer = new System.Timers.Timer(1000);
-                // Hook up the Elapsed event for the timer. 
-                aTimer.Elapsed += decrementCountdown;
-                aTimer.AutoReset = false;
-                aTimer.Enabled = true;
 
-                GameGraceCountdown.Text = countdown.toString();
-            }
-            */
+            //turn microwave on
+            if (ARDUINO_CONNECTED) port.Write(new byte[] { (byte)(int)serialMessageOptions.CorrectMove }, 0, 1);
 
+            //show 'GO'
             Timer bTimer = new System.Timers.Timer(2000);
-            // Hook up the Elapsed event for the timer. 
             bTimer.Elapsed += showGo;
             bTimer.AutoReset = false;
             bTimer.Enabled = true;
 
+            //start dance 
             aTimer = new System.Timers.Timer(3000);
-            // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += startDance;
             aTimer.AutoReset = false;
             aTimer.Enabled = true;
-            
-
-            //start dance
-            //startDance();
         }
 
         void decrementCountdown(Object source, ElapsedEventArgs e){
