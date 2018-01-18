@@ -836,9 +836,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         void validationIncorrectUI(){
             //change to checkmark picture
             this.checkOrRed.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images\red.jpeg",UriKind.Relative));
-                    
-            //signal to arduino
-            if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
         }
 
         void newGame(object sender, RoutedEventArgs e){
@@ -917,6 +914,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         //turns off microwave
         void endgame(){
+            // turn off microwave
             if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
             aTimer.Stop();
             player.Stop();
