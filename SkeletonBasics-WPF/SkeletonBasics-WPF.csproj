@@ -105,6 +105,7 @@
     <Resource Include="Images\moves\disco.png" />
     <Resource Include="Images\moves\jumpingjack.png" />
     <Resource Include="Images\moves\cabbage.png" />
+    <Resource Include="Images\moves\balloons.jpg" />
     <Resource Include="Song\blurredlines.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

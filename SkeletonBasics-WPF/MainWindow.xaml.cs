@@ -50,8 +50,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// dance move prompt
         System.Windows.Media.Imaging.BitmapImage danceImage;
         private int danceState;
-        enum danceStateOptions {JumpingJack, ArmCircle, Disco, Cabbage, Floss};
-        private int timePerDanceMove = 7000; //milliseconds
+        enum danceStateOptions {JumpingJack, ArmCircle, Disco, Cabbage, Floss, Balloons};
+        private int timePerDanceMove = 5000; //milliseconds
         private static System.Timers.Timer aTimer;
         // time when the current dance move started
         private DateTime GracePeriodEndTime = new DateTime(0);
@@ -61,11 +61,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         int serialDebugVar; //for serial demo/debug
         enum serialMessageOptions {doNotUse, CorrectMove, IncorrectMove};
 
+        int countdown = 3;
+
         //music
         SoundPlayer player;
 
         //debug globals
-        private bool ARDUINO_CONNECTED = false;
+        private bool ARDUINO_CONNECTED = true;
 
         /*** GLOBALS ADDED BY IRENE ***/
 
@@ -730,9 +732,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png",UriKind.Relative));
                     //this.danceState = (int)danceStateOptions.JumpingJack;
                     this.danceState = (int)danceStateOptions.Cabbage;
-                } else { //if(this.danceState == danceStateOptions.Cabbage){
+                } else if(this.danceState == (int)danceStateOptions.Cabbage){
                     this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/cabbage.png",UriKind.Relative));
-                    this.danceState = (int)danceStateOptions.JumpingJack;
+                    this.danceState = (int)danceStateOptions.Balloons;
+                } else { //if(this.danceState == (int)danceStateOptions.Balloons){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/balloons.jpg",UriKind.Relative));
+                    //this.danceState = (int)danceStateOptions.JumpingJack;
+                    this.danceState = (int)danceStateOptions.Balloons;
+                    aTimer.Stop();
+                    endgame();
                 }
 
                 DanceMove.Source = this.danceImage;
@@ -823,12 +831,24 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             //hide button
             uniformGrid.Visibility = Visibility.Hidden;
             GameGraceText.Visibility = Visibility.Visible;
-            
+/*
+            while(countdown > 0){
+                aTimer = new System.Timers.Timer(1000);
+                // Hook up the Elapsed event for the timer. 
+                aTimer.Elapsed += decrementCountdown;
+                aTimer.AutoReset = false;
+                aTimer.Enabled = true;
 
-            //wait
-            //System.Threading.Thread.Sleep(3000);
+                GameGraceCountdown.Text = countdown.toString();
+            }
+            */
 
-            
+            Timer bTimer = new System.Timers.Timer(2000);
+            // Hook up the Elapsed event for the timer. 
+            bTimer.Elapsed += showGo;
+            bTimer.AutoReset = false;
+            bTimer.Enabled = true;
+
             aTimer = new System.Timers.Timer(3000);
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += startDance;
@@ -838,6 +858,16 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             //start dance
             //startDance();
+        }
+
+        void decrementCountdown(Object source, ElapsedEventArgs e){
+            countdown--;
+        }
+
+        void showGo(Object source, ElapsedEventArgs e){
+            Dispatcher.Invoke((Action)delegate() { 
+                GameGraceCountdown.Visibility = Visibility.Visible;
+            });
         }
 
         void startDance(Object source, ElapsedEventArgs e){
@@ -860,6 +890,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 aTimer.AutoReset = false;
                 //aTimer.Enabled = true;
                 aTimer.Start();
+        }
+
+        //turns off microwave
+        void endgame(){
+            //if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+            player.Stop();
         }
     }
 }
