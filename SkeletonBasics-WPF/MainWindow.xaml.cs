@@ -49,8 +49,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// dance move prompt
         System.Windows.Media.Imaging.BitmapImage danceImage;
-        private int danceState;
-        enum danceStateOptions {JumpingJack, ArmCircle, Disco, Cabbage, Floss, Balloons};
+        enum danceStateOptions {Start,JumpingJack, ArmCircle, Disco, Cabbage, Floss, Balloons};
+        private int danceState = (int)danceStateOptions.Start;
         private int timePerDanceMove = 5000; //milliseconds
         private static System.Timers.Timer aTimer;
         // time when the current dance move started
@@ -74,6 +74,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// global index counter 
         private int index = 0;
         private int lives = 3;
+        private const double DANCEMOVEGRACEPD = 1.0; //seconds
         //private bool endOfRow = false;
         private const int ARRLEN = 50;
         private const int Xcoord = 0;
@@ -100,7 +101,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private const double DSC_HLTHRESH = .3;         //dist bw left hand and lef hip upper bound
         private const double STRAIGHT_DELTA = 2;
         private const double AC_YHANDTHRESH = .001;    //variance for vertical lower bound
-        private const double AC_XHANDTHRESH = .01;    //variance for horizontal upper bound
+        private const double AC_XHANDTHRESH = .05;    //variance for horizontal upper bound
         private const double CP_XHANDTHRESH = .007;    //variance lower bound
         private const double CP_YHANDTHRESH = .007;    //variance upper bound
         private const double CP_ZHANDTHRESH = .01;    //variance lower bound
@@ -201,7 +202,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             
             if(ARDUINO_CONNECTED) arduinoSetup();
 
-            var path = @"C:\Users\amyli\just-heat-it\SkeletonBasics-WPF\Song\blurredlines.wav";
+            //var path = @"C:\Users\amyli\just-heat-it\SkeletonBasics-WPF\Song\blurredlines.wav";
+            var path = @"C:\Users\irenelin0258\Documents\just-heat-it\SkeletonBasics-WPF\Song\blurredlines.wav";
             player = new SoundPlayer(path);
             player.Load();
 
@@ -247,7 +249,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             Joint j = skeleton.Joints[jointType];
             // If we can't find the joint, exit
-            if (j.TrackingState == JointTrackingState.NotTracked) return -10;
+            if (j.TrackingState == JointTrackingState.NotTracked) return 0;
             
             double position = 0;
             switch (coord)
@@ -295,15 +297,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// Update coordinate, sum, sum of squares, and variance of a joint
         private void LogJointPosition(Skeleton skeleton, JointType jointType, 
-                                        double[,] arr, double[,] arrConst, int index, int coord)
+                                        double[,] arr, int index, int coord)
         {
             Joint j = skeleton.Joints[jointType];
             // If we can't find the joint, exit
             if (j.TrackingState == JointTrackingState.NotTracked) return;
             //update array of coordinates
-            double position = this.GetJointPosition(skeleton, jointType, coord);
-            // if joint position was an error, copy the previous cell
-            if (position == -10) arr[coord,index] = arr[coord,(index-1)%ARRLEN];
+            arr[coord, index] = this.GetJointPosition(skeleton, jointType, coord);
         }
 
         // compute sum, sum of squares, and variance of a joint
@@ -332,12 +332,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             double elbowY = GetJointPosition(skeleton, elbow, Ycoord);
             double shoulderX = GetJointPosition(skeleton, shoulder, Xcoord);
             double shoulderY = GetJointPosition(skeleton, shoulder, Ycoord);
-
-            if (wristX == -10 || wristY == -10 || elbowX == -10 || elbowY == -10 || shoulderX == -10 || shoulderY == -10)
-            {
-                // one of the joints returned an error
-                return false;
-            }
 
             double slope1 = GetSlope(wristX, elbowX, wristY, elbowY);
             double slope2 = GetSlope(elbowX, shoulderX, elbowY, shoulderY);
@@ -377,10 +371,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 (KLvarX > JJ_KNEETHRESH) && (KLvarY > JJ_KNEETHRESH);                             
 
             System.Console.WriteLine(
-                "JJ" + "\t" + 
-                this.HandRightStats_arr[SUMcoord,Ycoord] + "\t" + 
-                this.HandRightStats_arr[SOScoord,Ycoord] + "\t" + 
-                this.HandRightStats_arr[VARcoord,Ycoord] + "\t" +
+                "JJ" + "\t" +
+                KRvarX + "\t" +
+                KRvarY + "\t" +
+                KLvarX + "\t" +
+                KLvarY + "\t" +
                 isJumpingJackHands + "\t" + isJumpingJackKnees + "\t");
 
             return isJumpingJackHands && isJumpingJackKnees;
@@ -475,20 +470,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void TrackJoints(Skeleton skeleton, int index)
         {
             //track hands
-            LogJointPosition(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index, Xcoord);
-            LogJointPosition(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index, Ycoord);
-            LogJointPosition(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index, Xcoord);
-            LogJointPosition(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index, Ycoord);
+            LogJointPosition(skeleton, JointType.HandRight, HandRight_arr, index, Xcoord);
+            LogJointPosition(skeleton, JointType.HandRight, HandRight_arr, index, Ycoord);
+            LogJointPosition(skeleton, JointType.HandLeft, HandLeft_arr, index, Xcoord);
+            LogJointPosition(skeleton, JointType.HandLeft, HandLeft_arr, index, Ycoord);
             //track knees
-            LogJointPosition(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index, Xcoord);
-            LogJointPosition(skeleton, JointType.KneeRight, KneeRight_arr, KneeRightStats_arr, index, Ycoord);
-            LogJointPosition(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index, Xcoord);
-            LogJointPosition(skeleton, JointType.KneeLeft, KneeLeft_arr, KneeLeftStats_arr, index, Ycoord);
+            LogJointPosition(skeleton, JointType.KneeRight, KneeRight_arr, index, Xcoord);
+            LogJointPosition(skeleton, JointType.KneeRight, KneeRight_arr, index, Ycoord);
+            LogJointPosition(skeleton, JointType.KneeLeft, KneeLeft_arr, index, Xcoord);
+            LogJointPosition(skeleton, JointType.KneeLeft, KneeLeft_arr, index, Ycoord);
             
             if (this.danceState == (int) danceStateOptions.Cabbage)
             {   // only log the z coordinate if the dance move is cabbage patch
-                LogJointPosition(skeleton, JointType.HandRight, HandRight_arr, HandRightStats_arr, index, Zcoord);
-                LogJointPosition(skeleton, JointType.HandLeft, HandLeft_arr, HandLeftStats_arr, index, Zcoord);
+                LogJointPosition(skeleton, JointType.HandRight, HandRight_arr, index, Zcoord);
+                LogJointPosition(skeleton, JointType.HandLeft, HandLeft_arr, index, Zcoord);
             }
         }
 
@@ -506,6 +501,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 switch (this.danceState)
                 {   //current time is after the grace period end time
+                    case (int)danceStateOptions.Start:
+                        return;
                     case (int)danceStateOptions.JumpingJack:
                         //System.Console.WriteLine("do jumping jack!");
                         isCorrect = isJumpingJack();
@@ -522,13 +519,28 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         // System.Console.WriteLine("do cabbage patch!");
                         isCorrect = isCabbagePatch(skeleton);
                         break;
+                    case (int)danceStateOptions.Balloons:
+                        return;
                     default:
                         break;
                 }
             }
 
-            if(isCorrect){validationCorrectUI();}
-            else{validationIncorrectUI();lives -= 1; } 
+            if (isCorrect)
+            {
+                validationCorrectUI();
+            }
+            else
+            {
+                validationIncorrectUI();
+                lives -= 1;
+                System.Console.WriteLine("WRONG. LOSE ONE LIFE.");
+                if (lives == 0)
+                {
+                    System.Console.WriteLine("LOST ALL LIVES");
+                    this.endgame();
+                }
+            } 
         }
 
         /// Event handler for Kinect sensor's SkeletonFrameReady event
@@ -536,7 +548,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// <param name="e">event arguments</param>
         private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            Skeleton[] skeletons = new Skeleton[0];
+            Skeleton[] skeletons = new Skeleton[01];
 
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
             {
@@ -554,6 +566,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 this.TrackJoints(skeleton, index);
                                 if (index == ARRLEN - 1)
                                 {   // validate move when we have updated a complete row
+                                    // dont cvalidate if game is over
                                     this.validate(skeleton);
                                 }
                                 index++;
@@ -574,7 +587,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     foreach (Skeleton skel in skeletons)
                     {
-                        RenderClippedEdges(skel, dc);
+                        if (skel != null) RenderClippedEdges(skel, dc);
 
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
@@ -705,11 +718,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             //start dance
             this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png", UriKind.Relative));
-            this.danceState = (int)danceStateOptions.JumpingJack;
+            this.danceState = (int)danceStateOptions.Start;
             DanceMove.Source = this.danceImage;
             player.Play();
             // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(200); 
+            aTimer = new System.Timers.Timer(timePerDanceMove); 
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = false;
@@ -721,31 +734,38 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
-            Dispatcher.Invoke((Action)delegate() { 
-                if(this.danceState == (int)danceStateOptions.JumpingJack){
+            Dispatcher.Invoke((Action)delegate() {
+                if (this.danceState == (int)danceStateOptions.Start){
                     this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png",UriKind.Relative));
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png", UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.JumpingJack;
+                } else if (this.danceState == (int)danceStateOptions.JumpingJack){
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png",UriKind.Relative));
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png", UriKind.Relative));
                     this.danceState = (int)danceStateOptions.ArmCircle;
                 } else if(this.danceState == (int)danceStateOptions.ArmCircle){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png",UriKind.Relative));
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png",UriKind.Relative));
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png", UriKind.Relative));
                     this.danceState = (int)danceStateOptions.Disco;
                 } else if(this.danceState == (int)danceStateOptions.Disco){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png",UriKind.Relative));
-                    //this.danceState = (int)danceStateOptions.JumpingJack;
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png",UriKind.Relative));
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/cabbage.png", UriKind.Relative));
                     this.danceState = (int)danceStateOptions.Cabbage;
                 } else if(this.danceState == (int)danceStateOptions.Cabbage){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/cabbage.png",UriKind.Relative));
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/cabbage.png",UriKind.Relative));
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/balloons.jpg", UriKind.Relative));
                     this.danceState = (int)danceStateOptions.Balloons;
+                    endgame();
                 } else { //if(this.danceState == (int)danceStateOptions.Balloons){
                     this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/balloons.jpg",UriKind.Relative));
                     //this.danceState = (int)danceStateOptions.JumpingJack;
                     this.danceState = (int)danceStateOptions.Balloons;
-                    aTimer.Stop();
                     endgame();
                 }
 
                 DanceMove.Source = this.danceImage;
                 //set grace period
-                GracePeriodEndTime = DateTime.Now.AddSeconds(2.0);
+                GracePeriodEndTime = DateTime.Now.AddSeconds(DANCEMOVEGRACEPD);
 
                 aTimer = new System.Timers.Timer(timePerDanceMove); 
                 // Hook up the Elapsed event for the timer. 
@@ -894,7 +914,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         //turns off microwave
         void endgame(){
-            //if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+            if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
+            aTimer.Stop();
             player.Stop();
         }
 
