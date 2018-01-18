@@ -694,25 +694,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
         }
 
-        /// Handles the checking or unchecking of the seated mode combo box
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void CheckBoxSeatedModeChanged(object sender, RoutedEventArgs e)
-        {
-            if (null != this.sensor)
-            {
-                /*if (this.checkBoxSeatedMode.IsChecked.GetValueOrDefault())
-                {
-                    this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
-                }
-                else
-                {
-                    this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
-                } */
-                this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
-            }
-        }
-
         void onClick1(object sender, RoutedEventArgs e)
         {
             //hide button
@@ -784,34 +765,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         }    
         
         void arduinoSetup(){
-            // Get a list of serial port names.
             string[] ports = SerialPort.GetPortNames();
-
             //if ports is empty. print error
             if(ports.Length == 0) {System.Diagnostics.Debug.WriteLine("[arduinoSetup] ERROR: no ports found");}
 
-            //System.Diagnostics.Debug.WriteLine("The following serial ports were found:");
-
-            // Display each port name to the console.
-            foreach(string portName in ports) {
-                //System.Diagnostics.Debug.WriteLine(portName);
-                
-                // Instantiate the communications
-                // port with some basic settings
+            foreach(string portName in ports) {                
                 port = new SerialPort(portName, 9600, Parity.None, 8, StopBits.One);
-
-                // Open the port for communications
                 port.Open();
-
-                // Write a string
-                //port.Write("Hello World");
-
-                // Write a set of bytes
-                //port.Write(new byte[] {0x01}, 0, 1);
-
-                // Close the port
-                //port.Close();
-                //move ^ to window close
 
                 serialDebugVar = (int)serialMessageOptions.CorrectMove; //for debug
 
@@ -848,6 +808,55 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     
             //signal to arduino
             if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
+        }
+
+        void newGame(object sender, RoutedEventArgs e){
+            //returns to game start mode
+            uniformGrid2.Visibility = Visibility.Hidden;
+            uniformGrid.Visibility = Visibility.Visible;
+            aTimer.Stop();
+        }
+
+        void gameGracePeriod(object sender, RoutedEventArgs e){
+            //hide button
+            uniformGrid.Visibility = Visibility.Hidden;
+            GameGraceText.Visibility = Visibility.Visible;
+            
+
+            //wait
+            //System.Threading.Thread.Sleep(3000);
+
+            
+            aTimer = new System.Timers.Timer(3000);
+            // Hook up the Elapsed event for the timer. 
+            aTimer.Elapsed += startDance;
+            aTimer.AutoReset = false;
+            aTimer.Enabled = true;
+            
+
+            //start dance
+            //startDance();
+        }
+
+        void startDance(Object source, ElapsedEventArgs e){
+            Dispatcher.Invoke((Action)delegate() { 
+                //hide grace period text
+                GameGraceText.Visibility = Visibility.Hidden;
+                uniformGrid2.Visibility = Visibility.Visible;
+
+                //start dance
+                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png", UriKind.Relative));
+                this.danceState = (int)danceStateOptions.JumpingJack;
+                DanceMove.Source = this.danceImage;
+            });
+
+                // Create a timer with a two second interval.
+                aTimer = new System.Timers.Timer(3000);
+                // Hook up the Elapsed event for the timer. 
+                aTimer.Elapsed += OnTimedEvent;
+                aTimer.AutoReset = true;
+                aTimer.Enabled = true;
+                //aTimer.Start();
         }
     }
 }

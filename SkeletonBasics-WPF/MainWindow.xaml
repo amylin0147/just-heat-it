@@ -51,6 +51,7 @@
       <ColumnDefinition Width="Auto" />
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
+
     <UniformGrid Grid.Column="0" Columns="1" Rows="1" Name="uniformGrid" >
       <Button x:Name = "button1"
                   Content = "START"
@@ -70,17 +71,37 @@
             Foreground = "Gray"/>-->
     </UniformGrid>
 
-    <UniformGrid Grid.Column="0" Columns="1" Rows="3" Visibility="Hidden" Name="uniformGrid2" >
-      
-      <Image Name="checkOrRed" Source="Images\check.png" 
-             Stretch="Fill" Height="81" Width="81" Margin="0 0 0 0" />
-      <TextBlock Name="timeText" Margin="30 0 0 0" VerticalAlignment="Center"
-                 Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" 
-                 FontSize="36" >Time Left: 60s</TextBlock>
+    <!-- Game Grace screen -->
+    <TextBlock Name="GameGraceText" Margin="30 0 0 0" VerticalAlignment="Center"
+                   Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" 
+                   FontSize="18" Visibility="Hidden">Start the microwave! </TextBlock>
 
-      <Image x:Name="DanceMove" Source="Images\moves\dance1.png"
-             Stretch="Uniform" Width="400" HorizontalAlignment="Center" Margin="0 0 0 0" />
-    </UniformGrid>
+    <!-- Game play screen -->
+    <Grid Grid.Column="0" Visibility="Hidden" Name="uniformGrid2" >
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+      <UniformGrid Grid.Row="0" Columns="1" Rows="2" Visibility="Visible" Name="uniformGrid3" >
+        <Image Name="checkOrRed" Source="Images\check.png" 
+               Stretch="Fill" Height="81" Width="81" Margin="10 10 10 5" />
+        <!-- <TextBlock Name="timeText" Margin="30 0 0 0" VerticalAlignment="Center"
+                   Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" 
+                   FontSize="18" >Time Left: 60s</TextBlock> -->
+
+        <Image x:Name="DanceMove" Source="Images\moves\dance1.png"
+               Stretch="None" HorizontalAlignment="Center" Margin="10 0 10 0" />
+      </UniformGrid>
+      <Button x:Name = "button3"
+            Content = "New Game"
+            Click = "newGame"
+            Margin = "10"
+            Width = "150"
+            HorizontalAlignment = "Center"
+            Foreground = "Gray"
+            Grid.Row="1"/>
+    </Grid>
+
     <Viewbox Grid.Column="1" Stretch="Uniform" HorizontalAlignment="Center">
       <Image Name="Image" Width="640" Height="480"/>
     </Viewbox>
