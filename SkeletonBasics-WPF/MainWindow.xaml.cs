@@ -712,11 +712,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             uniformGrid.Visibility = Visibility.Hidden;
 
             //start dance
-            this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png", UriKind.Relative));
-            this.danceState = (int)danceStateOptions.Cabbage;
+            this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png", UriKind.Relative));
+            this.danceState = (int)danceStateOptions.JumpingJack;
             DanceMove.Source = this.danceImage;
             // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(10000); //10 sec
+            aTimer = new System.Timers.Timer(7000); //7 sec
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
@@ -729,34 +729,25 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
             Dispatcher.Invoke((Action)delegate() { 
-                /*
-                if(this.danceState == (int)danceStateOptions.ChickenMove1){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance2.png",UriKind.Relative));
-                    this.danceState = (int)danceStateOptions.ChickenMove2;
-                } else if(this.danceState == (int)danceStateOptions.ChickenMove2){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance3.png",UriKind.Relative));
-                    this.danceState = (int)danceStateOptions.ChickenMove3;
-                } else if(this.danceState == (int)danceStateOptions.ChickenMove3){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance4.png",UriKind.Relative));
-                    this.danceState = (int)danceStateOptions.ChickenMove4;
+                if(this.danceState == (int)danceStateOptions.JumpingJack){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png",UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.ArmCircle;
+                } else if(this.danceState == (int)danceStateOptions.ArmCircle){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png",UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.Disco;
+                } else if(this.danceState == (int)danceStateOptions.Disco){
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png",UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.JumpingJack;
+                    //.danceState = (int)danceStateOptions.Cabbage;
                 } else { //if(this.danceState == danceStateOptions.ChickenMove4){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png",UriKind.Relative));
-                    this.danceState = (int)danceStateOptions.ChickenMove1;
+                    //TODO: this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png",UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.JumpingJack;
                 }
-                */
 
-                //leave as chicken picture until get jumping jack picture
-                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance2.png",UriKind.Relative));
-                this.danceState = (int)danceStateOptions.Cabbage;
                 DanceMove.Source = this.danceImage;
                 //set grace period
                 GracePeriodEndTime = DateTime.Now.AddSeconds(2.0);
             });
-
-            //change dance move 1 to 2
-            //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance2.png",UriKind.Relative));
-            //DanceMove.Source = this.danceImage;
-
         }
 
         void onClick2(object sender, RoutedEventArgs e){

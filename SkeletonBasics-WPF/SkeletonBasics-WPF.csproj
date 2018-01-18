@@ -101,10 +101,10 @@
   <ItemGroup>
     <Resource Include="Images\check.png" />
     <Resource Include="Images\red.jpeg" />
-    <Resource Include="Images\moves\dance1.png" />
-    <Resource Include="Images\moves\dance2.png" />
-    <Resource Include="Images\moves\dance3.png" />
-    <Resource Include="Images\moves\dance4.png" />
+    <Resource Include="Images\moves\armcircle.png" />
+    <Resource Include="Images\moves\disco.png" />
+    <Resource Include="Images\moves\jumpingjack.png" />
+    <!-- <Resource Include="Images\moves\dance4.png" /> -->
     <Resource Include="Song\chickenDance.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
