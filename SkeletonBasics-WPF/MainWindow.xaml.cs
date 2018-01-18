@@ -292,7 +292,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             //update array of coordinates
             double position = this.GetJointPosition(skeleton, jointType, coord);
             // if joint position was an error, copy the previous cell
-            if (position == -10): arr[coord,index] = arr[coord,(index-1)%ARRLEN];
+            if (position == -10) arr[coord,index] = arr[coord,(index-1)%ARRLEN];
         }
 
         // compute sum, sum of squares, and variance of a joint
