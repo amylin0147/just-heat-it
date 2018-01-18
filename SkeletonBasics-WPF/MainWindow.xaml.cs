@@ -49,8 +49,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         /// dance move prompt
         System.Windows.Media.Imaging.BitmapImage danceImage;
-        private int danceState;
-        enum danceStateOptions {JumpingJack, ArmCircle, Disco, Cabbage, Floss, Balloons};
+        enum danceStateOptions {Start,JumpingJack, ArmCircle, Disco, Cabbage, Floss, Balloons};
+        private int danceState = (int)danceStateOptions.Start;
         private int timePerDanceMove = 5000; //milliseconds
         private static System.Timers.Timer aTimer;
         // time when the current dance move started
@@ -74,6 +74,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// global index counter 
         private int index = 0;
         private int lives = 3;
+        private const double DANCEMOVEGRACEPD = 1.0; //seconds
         //private bool endOfRow = false;
         private const int ARRLEN = 50;
         private const int Xcoord = 0;
@@ -500,6 +501,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 switch (this.danceState)
                 {   //current time is after the grace period end time
+                    case (int)danceStateOptions.Start:
+                        return;
                     case (int)danceStateOptions.JumpingJack:
                         //System.Console.WriteLine("do jumping jack!");
                         isCorrect = isJumpingJack();
@@ -516,6 +519,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         // System.Console.WriteLine("do cabbage patch!");
                         isCorrect = isCabbagePatch(skeleton);
                         break;
+                    case (int)danceStateOptions.Balloons:
+                        return;
                     default:
                         break;
                 }
@@ -561,6 +566,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                                 this.TrackJoints(skeleton, index);
                                 if (index == ARRLEN - 1)
                                 {   // validate move when we have updated a complete row
+                                    // dont cvalidate if game is over
                                     this.validate(skeleton);
                                 }
                                 index++;
@@ -581,7 +587,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 {
                     foreach (Skeleton skel in skeletons)
                     {
-                        RenderClippedEdges(skel, dc);
+                        if (skel != null) RenderClippedEdges(skel, dc);
 
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
@@ -712,11 +718,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             //start dance
             this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png", UriKind.Relative));
-            this.danceState = (int)danceStateOptions.JumpingJack;
+            this.danceState = (int)danceStateOptions.Start;
             DanceMove.Source = this.danceImage;
             player.Play();
             // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(200); 
+            aTimer = new System.Timers.Timer(timePerDanceMove); 
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = false;
@@ -728,20 +734,28 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
-            Dispatcher.Invoke((Action)delegate() { 
-                if(this.danceState == (int)danceStateOptions.JumpingJack){
+            Dispatcher.Invoke((Action)delegate() {
+                if (this.danceState == (int)danceStateOptions.Start){
                     this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png",UriKind.Relative));
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png", UriKind.Relative));
+                    this.danceState = (int)danceStateOptions.JumpingJack;
+                } else if (this.danceState == (int)danceStateOptions.JumpingJack){
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png",UriKind.Relative));
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png", UriKind.Relative));
                     this.danceState = (int)danceStateOptions.ArmCircle;
                 } else if(this.danceState == (int)danceStateOptions.ArmCircle){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png",UriKind.Relative));
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/armcircle.png",UriKind.Relative));
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png", UriKind.Relative));
                     this.danceState = (int)danceStateOptions.Disco;
                 } else if(this.danceState == (int)danceStateOptions.Disco){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png",UriKind.Relative));
-                    //this.danceState = (int)danceStateOptions.JumpingJack;
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/disco.png",UriKind.Relative));
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/cabbage.png", UriKind.Relative));
                     this.danceState = (int)danceStateOptions.Cabbage;
                 } else if(this.danceState == (int)danceStateOptions.Cabbage){
-                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/cabbage.png",UriKind.Relative));
+                    //this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/cabbage.png",UriKind.Relative));
+                    this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/balloons.jpg", UriKind.Relative));
                     this.danceState = (int)danceStateOptions.Balloons;
+                    endgame();
                 } else { //if(this.danceState == (int)danceStateOptions.Balloons){
                     this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/balloons.jpg",UriKind.Relative));
                     //this.danceState = (int)danceStateOptions.JumpingJack;
@@ -751,7 +765,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 DanceMove.Source = this.danceImage;
                 //set grace period
-                GracePeriodEndTime = DateTime.Now.AddSeconds(2.0);
+                GracePeriodEndTime = DateTime.Now.AddSeconds(DANCEMOVEGRACEPD);
 
                 aTimer = new System.Timers.Timer(timePerDanceMove); 
                 // Hook up the Elapsed event for the timer. 
@@ -900,7 +914,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         //turns off microwave
         void endgame(){
-            //if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.CorrectMove}, 0, 1);
+            if(ARDUINO_CONNECTED) port.Write(new byte[] {(byte)(int)serialMessageOptions.IncorrectMove}, 0, 1);
             aTimer.Stop();
             player.Stop();
         }
