@@ -803,22 +803,46 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             aTimer.Stop();
         }
 
-        void gameGracePeriod(){
+        void gameGracePeriod(object sender, RoutedEventArgs e){
             //hide button
-            GameGraceText.Visibility = Visibility.Visible;
             uniformGrid.Visibility = Visibility.Hidden;
+            GameGraceText.Visibility = Visibility.Visible;
+            
 
-            //start dance
-            this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png", UriKind.Relative));
-            this.danceState = (int)danceStateOptions.JumpingJack;
-            DanceMove.Source = this.danceImage;
-            // Create a timer with a two second interval.
+            //wait
+            //System.Threading.Thread.Sleep(3000);
+
+            
             aTimer = new System.Timers.Timer(3000);
             // Hook up the Elapsed event for the timer. 
-            aTimer.Elapsed += OnTimedEvent;
-            aTimer.AutoReset = true;
+            aTimer.Elapsed += startDance;
+            aTimer.AutoReset = false;
             aTimer.Enabled = true;
-            //aTimer.Start();
+            
+
+            //start dance
+            //startDance();
+        }
+
+        void startDance(Object source, ElapsedEventArgs e){
+            Dispatcher.Invoke((Action)delegate() { 
+                //hide grace period text
+                GameGraceText.Visibility = Visibility.Hidden;
+                uniformGrid2.Visibility = Visibility.Visible;
+
+                //start dance
+                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png", UriKind.Relative));
+                this.danceState = (int)danceStateOptions.JumpingJack;
+                DanceMove.Source = this.danceImage;
+            });
+
+                // Create a timer with a two second interval.
+                aTimer = new System.Timers.Timer(3000);
+                // Hook up the Elapsed event for the timer. 
+                aTimer.Elapsed += OnTimedEvent;
+                aTimer.AutoReset = true;
+                aTimer.Enabled = true;
+                //aTimer.Start();
         }
     }
 }

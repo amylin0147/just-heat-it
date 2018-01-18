@@ -117,7 +117,7 @@
     <UniformGrid Grid.Column="0" Columns="1" Rows="2" Name="uniformGrid" >
       <Button x:Name = "button1"
                   Content = "Dance"
-                  Click = "onClick1"
+                  Click = "gameGracePeriod"
                   Margin = "10"
                   Width = "150"
                   HorizontalAlignment = "Center"
@@ -134,7 +134,7 @@
     <!-- Game Grace screen -->
     <TextBlock Name="GameGraceText" Margin="30 0 0 0" VerticalAlignment="Center"
                    Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" 
-                   FontSize="18" >Start the microwave! </TextBlock>
+                   FontSize="18" Visibility="Hidden">Start the microwave! </TextBlock>
 
     <!-- Game play screen -->
     <Grid Grid.Column="0" Visibility="Hidden" Name="uniformGrid2" >
