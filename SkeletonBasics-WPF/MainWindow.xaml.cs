@@ -815,6 +815,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             uniformGrid2.Visibility = Visibility.Hidden;
             uniformGrid.Visibility = Visibility.Visible;
             aTimer.Stop();
+            player.Stop();
         }
 
         void gameGracePeriod(object sender, RoutedEventArgs e){
@@ -845,18 +846,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 uniformGrid2.Visibility = Visibility.Visible;
 
                 //start dance
-                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/dance1.png", UriKind.Relative));
+                this.danceImage = new System.Windows.Media.Imaging.BitmapImage(new Uri(@"Images/moves/jumpingjack.png", UriKind.Relative));
                 this.danceState = (int)danceStateOptions.JumpingJack;
                 DanceMove.Source = this.danceImage;
             });
 
+                player.Play();
                 // Create a timer with a two second interval.
-                aTimer = new System.Timers.Timer(3000);
+                aTimer = new System.Timers.Timer(200); 
                 // Hook up the Elapsed event for the timer. 
                 aTimer.Elapsed += OnTimedEvent;
-                aTimer.AutoReset = true;
-                aTimer.Enabled = true;
-                //aTimer.Start();
+                aTimer.AutoReset = false;
+                //aTimer.Enabled = true;
+                aTimer.Start();
         }
     }
 }
