@@ -535,9 +535,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 validationIncorrectUI();
                 lives -= 1;
                 System.Console.WriteLine("WRONG. LOSE ONE LIFE.");
+                updateHeartsUI();
                 if (lives == 0)
                 {
                     System.Console.WriteLine("LOST ALL LIVES");
+                    switchToLosePage();
                     this.endgame();
                 }
             } 
@@ -788,15 +790,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         void newGame(object sender, RoutedEventArgs e){
             //returns to game start mode
-            uniformGrid2.Visibility = Visibility.Hidden;
+            uniformGrid2.Visibility = Visibility.Collapsed;
             uniformGrid.Visibility = Visibility.Visible;
+            GameLoseScreen.Visibility = Visibility.Collapsed;
+            resetHeartsUI();
             aTimer.Stop();
             player.Stop();
         }
 
         void gameGracePeriod(object sender, RoutedEventArgs e){
             //hide start button
-            uniformGrid.Visibility = Visibility.Hidden;
+            uniformGrid.Visibility = Visibility.Collapsed;
             //show 'microwave ready' text
             GameGraceText.Visibility = Visibility.Visible;
 
@@ -829,7 +833,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         void startDance(Object source, ElapsedEventArgs e){
             Dispatcher.Invoke((Action)delegate() { 
                 //hide grace period text
-                GameGraceText.Visibility = Visibility.Hidden;
+                GameGraceText.Visibility = Visibility.Collapsed;
                 uniformGrid2.Visibility = Visibility.Visible;
 
                 //start dance
@@ -859,8 +863,22 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         //switch from game play screen to lose screen
         void switchToLosePage(){
-            uniformGrid2.Visibility = Visibility.Hidden;
+            uniformGrid2.Visibility = Visibility.Collapsed;
             GameLoseScreen.Visibility = Visibility.Visible;
+        }
+
+        void updateHeartsUI()
+        {
+            if (lives == 2) Heart1.Visibility = Visibility.Hidden;
+            if(lives == 1) Heart2.Visibility = Visibility.Hidden;
+            if(lives == 0) Heart3.Visibility = Visibility.Hidden;
+        }
+
+        void resetHeartsUI()
+        {
+            Heart1.Visibility = Visibility.Visible;
+            Heart2.Visibility = Visibility.Visible;
+            Heart3.Visibility = Visibility.Visible;
         }
     }
 }
