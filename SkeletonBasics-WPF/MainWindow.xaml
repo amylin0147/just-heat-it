@@ -142,7 +142,7 @@
 
                 <UniformGrid Grid.Row="1" Name="Hearts" Rows="1" Columns="3" Margin="5 10 0 20">
                     <Image Grid.Column="0" x:Name="Heart1" Source="Images\heart.jpg"
-                            Stretch="Uniform" Height="50" Width="50" HorizontalAlignment="Center" Margin="0 0 0 0" />
+                            Stretch="Uniform" Height="50" Width="50" HorizontalAlignment="Center" Margin="0,0,0,0" />
                     <Image Grid.Column="1" x:Name="Heart2" Source="Images\heart.jpg"
                             Stretch="Uniform" Height="50" Width="50" HorizontalAlignment="Center" Margin="0 0 0 0" />
                     <Image Grid.Column="2" x:Name="Heart3" Source="Images\heart.jpg"

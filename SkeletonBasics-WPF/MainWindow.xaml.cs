@@ -562,33 +562,22 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                     if (skeletons.Length != 0)
                     {
-                        Skeleton closestSkel = skeletons[0];
-                        double closestHipZDist = 10;
                         foreach (Skeleton skeleton in skeletons)
                         {
-                            double X = this.GetJointPosition(skeleton, JointType.HipCenter, Xcoord);
-                            double Z = this.GetJointPosition(skeleton, JointType.HipCenter, Zcoord);
-                            if (System.Math.Abs(X) < CENTERISH_DELTA && Z < closestHipZDist)
+                            if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                             {
-                                closestSkel = skeleton;
-                                closestHipZDist = Z;
+                                this.TrackJoints(skeleton, index);
+                                if (index == ARRLEN - 1)
+                                {   // validate move when we have updated a complete row
+                                    // dont cvalidate if game is over
+                                    this.validate(skeleton);
+                                }
+                                index++;
+                                index = index % ARRLEN;
+                                //System.Console.WriteLine(index);
                             }
                         }
-
-                        if (closestSkel.TrackingState == SkeletonTrackingState.Tracked)
-                        {
-                            //HI IRENE WORK ON THIS FOR ME PLEAZE. track only lowest z value head and hips 
-                            this.TrackJoints(closestSkel, index);
-                            if (index == ARRLEN - 1)
-                            {   // validate move when we have updated a complete row
-                                // dont cvalidate if game is over
-                                this.validate(closestSkel);
-                            }
-                            index++;
-                            index = index % ARRLEN;
-                            //System.Console.WriteLine(index);
-                        }
-                    }     
+                    }
                 }
             }
 
@@ -891,6 +880,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             Heart1.Visibility = Visibility.Visible;
             Heart2.Visibility = Visibility.Visible;
             Heart3.Visibility = Visibility.Visible;
+            lives = 3;
         }
     }
 }
